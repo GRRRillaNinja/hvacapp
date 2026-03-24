@@ -40,7 +40,7 @@ async function loadJob() {
     }
 
     try {
-        const res = await fetch(`/api/jobs/${jobId}`, { headers: getHeaders() });
+        const res = await fetch(`/api/jobs.php?id=${jobId}`, { headers: getHeaders() });
         if (!res.ok) throw new Error('Not found');
         const job = await res.json();
         renderJob(job);

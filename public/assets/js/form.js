@@ -25,7 +25,7 @@ function formatPhone(p) {
 
 async function loadJob(jobId) {
     try {
-        const res = await fetch(`/api/jobs/${jobId}`, { headers: getHeaders() });
+        const res = await fetch(`/api/jobs.php?id=${jobId}`, { headers: getHeaders() });
         if (!res.ok) throw new Error('Job not found');
         return await res.json();
     } catch (err) {
@@ -39,8 +39,9 @@ async function loadJob(jobId) {
 async function saveJob(data) {
     const urlParams = new URLSearchParams(window.location.search);
     const jobId = urlParams.get('id');
-    const url = jobId ? `/api/jobs/${jobId}` : '/api/jobs';
+    const url = '/api/jobs.php';
     const method = jobId ? 'PUT' : 'POST';
+    if (jobId) data.id = parseInt(jobId);
 
     try {
         const res = await fetch(url, {
@@ -65,7 +66,7 @@ async function deleteJob() {
     if (!jobId) return;
 
     try {
-        const res = await fetch(`/api/jobs/${jobId}`, {
+        const res = await fetch(`/api/jobs.php?id=${jobId}`, {
             method: 'DELETE',
             headers: getHeaders()
         });
@@ -96,6 +97,84 @@ document.addEventListener('DOMContentLoaded', async () => {
     const phoneInput = document.querySelector('[name="phone"]');
     phoneInput.addEventListener('blur', () => {
         phoneInput.value = formatPhone(phoneInput.value);
+    });
+
+    // System selection - show/hide sections
+    const systemCheckboxes = document.querySelectorAll('[name^="system_"]');
+    systemCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            const isElectricHP = document.querySelector('[name="system_electric_heat_pump"]').checked;
+            const isElectricAC = document.querySelector('[name="system_electric_ac"]').checked;
+            const isGasAC = document.querySelector('[name="system_gas_ac"]').checked;
+            const isDualFuel = document.querySelector('[name="system_dual_fuel"]').checked;
+
+            // Electric sections show if Heat Pump or AC selected
+            document.getElementById('electric-indoor').style.display = (isElectricHP || isElectricAC) ? 'block' : 'none';
+            document.getElementById('electric-outdoor').style.display = (isElectricHP || isElectricAC) ? 'block' : 'none';
+
+            // Gas sections show if Gas AC or Dual Fuel selected
+            document.getElementById('gas-indoor').style.display = (isGasAC || isDualFuel) ? 'block' : 'none';
+            document.getElementById('gas-outdoor').style.display = (isGasAC || isDualFuel) ? 'block' : 'none';
+        });
+    });
+
+    // Conditional checkboxes - show UF value inputs
+    document.addEventListener('change', (e) => {
+        // Electric heat pump conditional checkboxes
+        if (e.target.name === 'i_replaced_blower_cap') {
+            const cond = document.getElementById('i_replaced_blower_cap_conditional');
+            if (cond) cond.style.display = e.target.checked ? 'block' : 'none';
+        }
+        if (e.target.name === 'ie_replaced_dual_cap') {
+            const cond = document.getElementById('ie_replaced_dual_cap_conditional');
+            if (cond) cond.style.display = e.target.checked ? 'block' : 'none';
+        }
+        // Gas system conditional checkboxes
+        if (e.target.name === 'g_replaced_blower_cap') {
+            const cond = document.getElementById('g_replaced_blower_cap_conditional');
+            if (cond) cond.style.display = e.target.checked ? 'block' : 'none';
+        }
+        if (e.target.name === 'go_replaced_dual_cap') {
+            const cond = document.getElementById('go_replaced_dual_cap_conditional');
+            if (cond) cond.style.display = e.target.checked ? 'block' : 'none';
+        }
+
+        // Radio buttons - show conditional options
+        if (e.target.name === 'i_evap_coil_clean') {
+            const cond = document.getElementById('i_evap_coil_clean_conditional');
+            if (cond) cond.style.display = e.target.value === 'no' ? 'block' : 'none';
+        }
+        if (e.target.name === 'i_blower_motor_clean') {
+            const cond = document.getElementById('i_blower_motor_clean_conditional');
+            if (cond) cond.style.display = e.target.value === 'no' ? 'block' : 'none';
+        }
+        if (e.target.name === 'ie_condenser_clean') {
+            const cond = document.getElementById('ie_condenser_clean_conditional');
+            if (cond) cond.style.display = e.target.value === 'no' ? 'block' : 'none';
+        }
+        // Gas system conditionals
+        if (e.target.name === 'g_evap_coil_clean') {
+            const cond = document.getElementById('g_evap_coil_clean_conditional');
+            if (cond) cond.style.display = e.target.value === 'no' ? 'block' : 'none';
+        }
+        if (e.target.name === 'g_blower_motor_clean') {
+            const cond = document.getElementById('g_blower_motor_clean_conditional');
+            if (cond) cond.style.display = e.target.value === 'no' ? 'block' : 'none';
+        }
+        if (e.target.name === 'go_condenser_clean') {
+            const cond = document.getElementById('go_condenser_clean_conditional');
+            if (cond) cond.style.display = e.target.value === 'no' ? 'block' : 'none';
+        }
+
+        // Capacitor type - show dual or run caps
+        if (e.target.name === 'ie_cap_type') {
+            document.getElementById('ie_dual_caps').style.display = e.target.value === 'dual' ? 'block' : 'none';
+            document.getElementById('ie_run_caps').style.display = e.target.value === 'run' ? 'block' : 'none';
+        }
+        if (e.target.name === 'go_cap_type') {
+            document.getElementById('go_dual_caps').style.display = e.target.value === 'dual' ? 'block' : 'none';
+            document.getElementById('go_run_caps').style.display = e.target.value === 'run' ? 'block' : 'none';
+        }
     });
 
     // Load job if editing

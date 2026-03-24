@@ -32,7 +32,7 @@ function getHeaders() {
 
 async function loadJobs() {
     try {
-        const res = await fetch('/api/jobs', { headers: getHeaders() });
+        const res = await fetch('/api/jobs.php', { headers: getHeaders() });
         if (!res.ok) throw new Error('Failed to load jobs');
         const jobs = await res.json();
         renderJobs(jobs);
