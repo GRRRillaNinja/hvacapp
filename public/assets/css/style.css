@@ -1,0 +1,404 @@
+/* ═══════════════════════════════════════════════════════════════
+   HVAC TECH APP - FRESH BUILD
+   Light theme for daylight field work
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+    --bg: #f8f7f5;
+    --bg-alt: #ffffff;
+    --text: #1a1815;
+    --text-light: #666;
+    --accent: #c85a1e;
+    --accent-dark: #a54416;
+    --success: #2e7d52;
+    --danger: #c0392b;
+    --border: #e0d9cf;
+    --space: 1rem;
+    --radius: 6px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* ─────────────────────────────────────────────────────────── */
+/* HEADERS & LAYOUT */
+/* ─────────────────────────────────────────────────────────── */
+
+.app-header {
+    background: var(--bg-alt);
+    border-bottom: 1px solid var(--border);
+    padding: 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.app-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.form-header {
+    background: var(--bg-alt);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.form-header h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.btn-back {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: var(--text);
+    transition: color 0.2s;
+}
+
+.btn-back:hover {
+    color: var(--accent);
+}
+
+/* ─────────────────────────────────────────────────────────── */
+/* BUTTONS */
+/* ─────────────────────────────────────────────────────────── */
+
+.btn {
+    padding: 0.75rem 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-dark);
+}
+
+.btn-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--border);
+}
+
+.btn-danger {
+    background: #ffe5e5;
+    color: var(--danger);
+    border: 1px solid #ffcccc;
+}
+
+.btn-danger:hover {
+    background: #ffcccc;
+}
+
+/* ─────────────────────────────────────────────────────────── */
+/* FORMS */
+/* ─────────────────────────────────────────────────────────── */
+
+.form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1.2rem 6rem;
+}
+
+.form-section {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-section h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    font-size: 0.95rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="tel"],
+.form-group input[type="date"],
+.form-group input[type="number"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 500;
+    background: var(--bg);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: #fefdfb;
+    box-shadow: 0 0 0 3px rgba(200, 90, 30, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-group input[type="checkbox"],
+.form-group input[type="radio"] {
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+
+/* ─────────────────────────────────────────────────────────── */
+/* CONDITIONAL FIELDS */
+/* ─────────────────────────────────────────────────────────── */
+
+.conditional {
+    display: none !important;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--bg);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+}
+
+.conditional.visible {
+    display: block !important;
+}
+
+/* ─────────────────────────────────────────────────────────── */
+/* YES/NO RADIO STYLING */
+/* ─────────────────────────────────────────────────────────── */
+
+.yn-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.yn-option {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    background: var(--bg);
+    text-align: center;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.yn-option input[type="radio"] {
+    display: none;
+}
+
+.yn-option input[type="radio"]:checked + label {
+    color: white;
+}
+
+.yn-option.selected-yes {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+}
+
+.yn-option.selected-no {
+    background: #ffcccc;
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+/* ─────────────────────────────────────────────────────────── */
+/* JOBS LIST */
+/* ─────────────────────────────────────────────────────────── */
+
+.jobs-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 1.2rem;
+}
+
+.job-card {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    border-left: 5px solid var(--accent);
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.job-card-header {
+    padding: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+}
+
+.job-card-header:hover {
+    background: var(--bg);
+}
+
+.job-card-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.job-card-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-top: 0.2rem;
+}
+
+.job-card-toggle {
+    font-size: 1.2rem;
+    transition: transform 0.3s;
+}
+
+.job-card.expanded .job-card-toggle {
+    transform: rotate(180deg);
+}
+
+.job-card-body {
+    display: none;
+    padding: 1.2rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.job-card.expanded .job-card-body {
+    display: block;
+}
+
+.job-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.8rem;
+}
+
+.job-row-label {
+    font-weight: 600;
+    min-width: 120px;
+    color: var(--text-light);
+}
+
+.job-row-value {
+    flex: 1;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-light);
+}
+
+/* ─────────────────────────────────────────────────────────── */
+/* FORM ACTIONS */
+/* ─────────────────────────────────────────────────────────── */
+
+.form-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-alt);
+    border-top: 1px solid var(--border);
+    padding: 1rem 1.2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-actions .btn {
+    flex: 1;
+    justify-content: center;
+}
+
+.form-page .form-container {
+    padding-bottom: 120px;
+}
+
+/* ─────────────────────────────────────────────────────────── */
+/* RESPONSIVE */
+/* ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+    .app-header,
+    .form-header {
+        padding: 1rem;
+    }
+
+    .form-section {
+        padding: 1rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+
+    .yn-group {
+        flex-direction: column;
+    }
+}

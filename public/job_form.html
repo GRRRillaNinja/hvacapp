@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ffffff">
+    <title>Job Form</title>
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="form-page">
+    <header class="form-header">
+        <button onclick="history.back()" class="btn-back">←</button>
+        <h1 id="form-title">New Job</h1>
+    </header>
+
+    <form id="job-form" class="form-container">
+        <input type="hidden" name="job_id">
+
+        <!-- Customer Info Section -->
+        <section class="form-section">
+            <h2>Customer Information</h2>
+            <div class="form-group">
+                <label>Name *</label>
+                <input type="text" name="customer_name" required>
+            </div>
+            <div class="form-group">
+                <label>Address Line 1</label>
+                <input type="text" name="address_line1">
+            </div>
+            <div class="form-group">
+                <label>Address Line 2</label>
+                <input type="text" name="address_line2">
+            </div>
+            <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" name="phone">
+            </div>
+        </section>
+
+        <!-- Job Details Section -->
+        <section class="form-section">
+            <h2>Job Details</h2>
+            <div class="form-group">
+                <label>Date *</label>
+                <input type="date" name="job_date" required>
+            </div>
+            <div class="form-group">
+                <label>Job Type *</label>
+                <select name="job_type" required>
+                    <option value="">Select job type...</option>
+                    <option value="maintenance_first_time">Maintenance - First Time</option>
+                    <option value="maintenance_renewal">Maintenance - Renewal</option>
+                    <option value="maintenance_check">Maintenance - Check</option>
+                    <option value="filter_change">Filter Change</option>
+                    <option value="service_call">Service Call</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status">
+                    <option value="pending">Pending</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="complete">Complete</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Systems Section -->
+        <section id="systems-section" style="display:none;" class="form-section">
+            <h2>Systems In Home</h2>
+            <div class="form-group">
+                <label><input type="checkbox" name="system_electric_heat_pump"> Electric Heat Pump</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="system_electric_ac"> Electric AC</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="system_gas_ac"> Gas/AC</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="system_dual_fuel"> Dual Fuel</label>
+            </div>
+        </section>
+
+        <!-- System Data Sections -->
+        <!-- Electric Heat Pump / Electric AC: i_ (indoor), ie_ (outdoor) -->
+        <section id="electric-indoor" style="display:none;" class="form-section">
+            <h2>Electric - Indoor Unit</h2>
+            <div class="form-group">
+                <label>Heat Strip Stage 1 Amps</label>
+                <input type="number" name="i_heat_strip_amps_1" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Heat Strip Stage 2 Amps</label>
+                <input type="number" name="i_heat_strip_amps_2" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Heat Strip Circuit</label>
+                <input type="text" name="i_heat_strip_circuit">
+            </div>
+            <div class="form-group">
+                <label>Blower Amps</label>
+                <input type="number" name="i_blower_amps" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Blower Capacitor (uf)</label>
+                <input type="number" name="i_blower_cap" step="0.1">
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="i_replaced_blower_cap"> Replaced Blower Capacitor</label>
+                <div class="conditional" id="i_replaced_blower_cap_conditional" style="display:none;">
+                    <input type="number" name="i_replaced_blower_cap_uf" step="0.1" placeholder="New capacity (uf)">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Evap Coil Clean</label>
+                <div class="yn-group">
+                    <div class="yn-option">
+                        <input type="radio" name="i_evap_coil_clean" value="yes"> <label>Yes</label>
+                    </div>
+                    <div class="yn-option">
+                        <input type="radio" name="i_evap_coil_clean" value="no"> <label>No</label>
+                    </div>
+                </div>
+                <div class="conditional" id="i_evap_coil_clean_conditional" style="display:none;">
+                    <label><input type="checkbox" name="i_evap_brushed"> Brushed</label>
+                    <label><input type="checkbox" name="i_evap_sprayed"> Sprayed</label>
+                    <label><input type="checkbox" name="i_evap_pulled_cleaned"> Pulled And Cleaned</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Blower Motor Clean</label>
+                <div class="yn-group">
+                    <div class="yn-option">
+                        <input type="radio" name="i_blower_motor_clean" value="yes"> <label>Yes</label>
+                    </div>
+                    <div class="yn-option">
+                        <input type="radio" name="i_blower_motor_clean" value="no"> <label>No</label>
+                    </div>
+                </div>
+                <div class="conditional" id="i_blower_motor_clean_conditional" style="display:none;">
+                    <select name="i_blower_motor_action">
+                        <option value="">Select action...</option>
+                        <option value="cleaned">Pulled And Cleaned</option>
+                        <option value="could_not">Could Not Pull And Clean</option>
+                    </select>
+                    <input type="text" name="i_blower_motor_reason" placeholder="Reason (if could not clean)" style="display:none; margin-top: 0.5rem;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Cleared Condensate Drain</label>
+                <div class="yn-group">
+                    <div class="yn-option">
+                        <input type="radio" name="i_condensate" value="yes"> <label>Yes</label>
+                    </div>
+                    <div class="yn-option">
+                        <input type="radio" name="i_condensate" value="no"> <label>No</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="i_insulated_condensate"> Insulated Condensate</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="i_insulated_suction"> Insulated Suction Line</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="i_reglued_cabinet"> Reglued Cabinet Door Insulation</label>
+            </div>
+            <div class="form-group">
+                <label>Other Notes</label>
+                <input type="text" name="i_indoor_other">
+            </div>
+            <div class="form-group">
+                <label>Custom Equipment Name</label>
+                <input type="text" name="i_indoor_designation">
+            </div>
+        </section>
+
+        <!-- Electric Outdoor: ie_ -->
+        <section id="electric-outdoor" style="display:none;" class="form-section">
+            <h2>Electric - Outdoor Unit</h2>
+            <div class="form-group">
+                <label>Capacitor Type</label>
+                <div class="yn-group">
+                    <div class="yn-option">
+                        <input type="radio" name="ie_cap_type" value="dual"> <label>Dual</label>
+                    </div>
+                    <div class="yn-option">
+                        <input type="radio" name="ie_cap_type" value="run"> <label>Run</label>
+                    </div>
+                </div>
+            </div>
+            <div id="ie_dual_caps" style="display:none;">
+                <div class="form-group">
+                    <label>Compressor (uf)</label>
+                    <input type="number" name="ie_dual_cap_comp" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Fan (uf)</label>
+                    <input type="number" name="ie_dual_cap_fan" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label><input type="checkbox" name="ie_replaced_dual_cap"> Replaced Dual Cap</label>
+                    <div class="conditional" id="ie_replaced_dual_cap_conditional" style="display:none;">
+                        <input type="number" name="ie_replaced_dual_cap_uf" step="0.1" placeholder="New capacity (uf)">
+                    </div>
+                </div>
+            </div>
+            <div id="ie_run_caps" style="display:none;">
+                <div class="form-group">
+                    <label>Compressor Run (uf)</label>
+                    <input type="number" name="ie_comp_run_cap" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Fan Run (uf)</label>
+                    <input type="number" name="ie_fan_run_cap" step="0.1">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Condenser Coil Clean</label>
+                <div class="yn-group">
+                    <div class="yn-option">
+                        <input type="radio" name="ie_condenser_clean" value="yes"> <label>Yes</label>
+                    </div>
+                    <div class="yn-option">
+                        <input type="radio" name="ie_condenser_clean" value="no"> <label>No</label>
+                    </div>
+                </div>
+                <div class="conditional" id="ie_condenser_clean_conditional" style="display:none;">
+                    <label><input type="checkbox" name="ie_condenser_cleaned"> Cleaned</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Compressor Amps</label>
+                <input type="number" name="ie_comp_amps" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Fan Amps</label>
+                <input type="number" name="ie_fan_amps" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Pressure High</label>
+                <input type="number" name="ie_pressure_high" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Pressure Low</label>
+                <input type="number" name="ie_pressure_low" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Suction Temp</label>
+                <input type="number" name="ie_suction_temp" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Superheat</label>
+                <input type="number" name="ie_superheat" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Liquid Temp</label>
+                <input type="number" name="ie_liquid_temp" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Subcool</label>
+                <input type="number" name="ie_subcool" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Refrigerant</label>
+                <input type="text" name="ie_refrigerant">
+            </div>
+            <div class="form-group">
+                <label>Indoor Ambient Temp</label>
+                <input type="number" name="ie_indoor_ambient" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Outdoor Ambient Temp</label>
+                <input type="number" name="ie_outdoor_ambient" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Other Notes</label>
+                <input type="text" name="ie_outdoor_other">
+            </div>
+            <div class="form-group">
+                <label>Custom Equipment Name</label>
+                <input type="text" name="ie_outdoor_designation">
+            </div>
+        </section>
+
+        <!-- Gas / Dual Fuel: g_ (indoor), go_ (outdoor) -->
+        <section id="gas-indoor" style="display:none;" class="form-section">
+            <h2>Gas - Indoor Unit</h2>
+            <div class="form-group">
+                <label>Inducer Amps</label>
+                <input type="number" name="g_inducer_amps" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Gas Pressure In</label>
+                <input type="number" name="g_gas_pressure_in" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Gas Pressure Out</label>
+                <input type="number" name="g_gas_pressure_out" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Blower Amps</label>
+                <input type="number" name="g_blower_amps" step="0.1">
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="g_replaced_blower_cap"> Replaced Blower Cap</label>
+                <div class="conditional" id="g_replaced_blower_cap_conditional" style="display:none;">
+                    <input type="number" name="g_replaced_blower_cap_uf" step="0.1" placeholder="New capacity (uf)">
+                </div>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="g_replaced_inducer_cap"> Replaced Inducer Cap</label>
+                <div class="conditional" id="g_replaced_inducer_cap_conditional" style="display:none;">
+                    <input type="number" name="g_replaced_inducer_cap_uf" step="0.1" placeholder="New capacity (uf)">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Evap Coil Clean</label>
+                <div class="yn-group">
+                    <div class="yn-option">
+                        <input type="radio" name="g_evap_coil_clean" value="yes"> <label>Yes</label>
+                    </div>
+                    <div class="yn-option">
+                        <input type="radio" name="g_evap_coil_clean" value="no"> <label>No</label>
+                    </div>
+                </div>
+                <div class="conditional" id="g_evap_coil_clean_conditional" style="display:none;">
+                    <label><input type="checkbox" name="g_evap_brushed"> Brushed</label>
+                    <label><input type="checkbox" name="g_evap_sprayed"> Sprayed</label>
+                    <label><input type="checkbox" name="g_evap_pulled_cleaned"> Pulled And Cleaned</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="g_cleaned_flame_sensor"> Cleaned Flame Sensor</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="g_insulated_condensate"> Insulated Condensate</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="g_insulated_suction"> Insulated Suction Line</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="g_reglued_cabinet"> Reglued Cabinet Door Insulation</label>
+            </div>
+            <div class="form-group">
+                <label>Other Notes</label>
+                <input type="text" name="g_indoor_other">
+            </div>
+            <div class="form-group">
+                <label>Custom Equipment Name</label>
+                <input type="text" name="g_indoor_designation">
+            </div>
+        </section>
+
+        <!-- Gas Outdoor: go_ -->
+        <section id="gas-outdoor" style="display:none;" class="form-section">
+            <h2>Gas - Outdoor Unit</h2>
+            <p style="color: #666; font-size: 0.9rem;">Same fields as electric outdoor unit</p>
+            <div class="form-group">
+                <label>Capacitor Type</label>
+                <div class="yn-group">
+                    <div class="yn-option">
+                        <input type="radio" name="go_cap_type" value="dual"> <label>Dual</label>
+                    </div>
+                    <div class="yn-option">
+                        <input type="radio" name="go_cap_type" value="run"> <label>Run</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Compressor Amps</label>
+                <input type="number" name="go_comp_amps" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Fan Amps</label>
+                <input type="number" name="go_fan_amps" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Pressure High</label>
+                <input type="number" name="go_pressure_high" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Pressure Low</label>
+                <input type="number" name="go_pressure_low" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Suction Temp</label>
+                <input type="number" name="go_suction_temp" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Superheat</label>
+                <input type="number" name="go_superheat" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Liquid Temp</label>
+                <input type="number" name="go_liquid_temp" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Subcool</label>
+                <input type="number" name="go_subcool" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>Refrigerant</label>
+                <input type="text" name="go_refrigerant">
+            </div>
+        </section>
+
+        <!-- Notes Section -->
+        <section class="form-section">
+            <h2>Notes</h2>
+            <div class="form-group">
+                <textarea name="notes" placeholder="Any additional notes..."></textarea>
+            </div>
+        </section>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Job</button>
+            <button type="button" onclick="history.back()" class="btn btn-secondary">Cancel</button>
+            <button type="button" id="delete-btn" style="display:none;" class="btn btn-danger" onclick="deleteJob()">Delete</button>
+        </div>
+    </form>
+
+    <script>
+        // Toggle system sections based on checkboxes
+        document.addEventListener('change', (e) => {
+            if (e.target.name === 'system_electric_heat_pump' || e.target.name === 'system_electric_ac') {
+                document.getElementById('electric-indoor').style.display =
+                    document.querySelector('[name="system_electric_heat_pump"]').checked ||
+                    document.querySelector('[name="system_electric_ac"]').checked ? 'block' : 'none';
+                document.getElementById('electric-outdoor').style.display =
+                    document.querySelector('[name="system_electric_heat_pump"]').checked ||
+                    document.querySelector('[name="system_electric_ac"]').checked ? 'block' : 'none';
+            }
+            if (e.target.name === 'system_gas_ac' || e.target.name === 'system_dual_fuel') {
+                document.getElementById('gas-indoor').style.display =
+                    document.querySelector('[name="system_gas_ac"]').checked ||
+                    document.querySelector('[name="system_dual_fuel"]').checked ? 'block' : 'none';
+                document.getElementById('gas-outdoor').style.display =
+                    document.querySelector('[name="system_gas_ac"]').checked ||
+                    document.querySelector('[name="system_dual_fuel"]').checked ? 'block' : 'none';
+            }
+
+            // Conditional field visibility
+            if (e.target.name.endsWith('_replaced_blower_cap') || e.target.name.endsWith('_replaced_inducer_cap') || e.target.name.endsWith('_replaced_dual_cap')) {
+                const conditionalId = e.target.name + '_conditional';
+                const conditional = document.getElementById(conditionalId);
+                if (conditional) {
+                    conditional.style.display = e.target.checked ? 'block' : 'none';
+                }
+            }
+
+            // Conditional fields for yes/no
+            if (e.target.name.endsWith('_coil_clean') || e.target.name.endsWith('_condenser_clean')) {
+                const conditionalId = e.target.name + '_conditional';
+                const conditional = document.getElementById(conditionalId);
+                if (conditional) {
+                    conditional.style.display = e.target.value === 'no' ? 'block' : 'none';
+                }
+            }
+
+            // Capacitor type toggle
+            if (e.target.name.endsWith('_cap_type')) {
+                const prefix = e.target.name.substring(0, e.target.name.length - 9);
+                const dualDiv = document.getElementById(prefix + '_dual_caps');
+                const runDiv = document.getElementById(prefix + '_run_caps');
+                if (dualDiv && runDiv) {
+                    dualDiv.style.display = e.target.value === 'dual' ? 'block' : 'none';
+                    runDiv.style.display = e.target.value === 'run' ? 'block' : 'none';
+                }
+            }
+        });
+    </script>
+
+    <script src="assets/js/form.js"></script>
+</body>
+</html>

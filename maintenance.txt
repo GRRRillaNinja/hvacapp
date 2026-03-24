@@ -1,0 +1,144 @@
+Customer Information:
+	Name: (text entry)
+	Address Line1: (text entry)
+	Address Line2: (text entry)
+	Phone Number: (numerical entry)
+	
+Maintenance: 
+	First Time, Renewal, Check:
+		System Type: Elecric Heat Pump, Gas / AC, Electric / AC, Dual Fuel
+			Electric Heat Pump, Electric / AC:
+				Indoor:
+					Heat Strip Amps: (numerical entry)
+					Blower Amps: (numerical entry)
+					Blower Capacitor: (numerical entry, or N/A)
+					Replaced Blower Capacitor: ✔ (numerical entry) uf
+					Evap Coil Clean:
+						Yes: ✔
+						No: Brushed Evap Coil, Sprayed Evap Coil, Pulled And Cleaned Evap Coil (multi choice)
+					Blower Motor Clean:
+						Yes: ✔
+						No: Pulled And Cleaned Blower Wheel, Could Not Pull And Clean Blower Wheel (include reason)
+					Cleared Condensate Drain:
+						Yes: ✔
+						No: Could Not Clear Condensate Drain (include reason)
+					Insulated Condensate Drain: ✔
+					Insulated Suction Line: ✔
+					Reglued Cabinet Door Insulation: ✔
+					Other: (text input)
+				Outdoor:
+					Condenser Coil Clean:
+						Yes: ✔
+						No: Cleaned Condenser Coil 
+					Dual Capacitor:
+						Compressor: (numerical entry) uf
+						Fan: (numerical entry) uf 
+						N/A: ✔
+					Replaced Dual Capacitor: ✔ (numerical entry) uf
+					Compressor Run Capacitor: (numerical entry) uf, or N/A 
+					Replaced Compressor Run Capacitor: ✔ (numerical entry) uf
+					Fan Run Capacitor: (numerical entry) uf, or N/A 
+					Replaced Fan Run Capacitor: ✔ (numerical entry) uf
+					Compressor Amps: (numerical entry)
+					Fan Amps: (numerical entry)
+					Operating Pressures: (numerical entry) / (numerical entry)
+					Refrigerant Type: (text input)
+					Superheat: (numerical entry) or N/A
+					Subcool: (numerical entry) or N/A 
+					Suction Line Temp: (numerical entry) degrees farenheit
+					Liquid Line Temp: (numerical entry) degrees farenheit 
+					Indoor Ambient Temp: (numerical entry) degrees farenheit
+					Outdoor Ambient Temp: (numerical entry) degrees farenheit
+				Other Notes: (text input)
+			Gas / AC:
+				Indoor:
+					Cleaned Flame Sensor: ✔
+					Gas Pressure In: (numerical entry) in wc
+					Gas Pressure Out: (numerical entry) in wc 
+					Inducer Motor Amps: (numerical entry)
+					Replaced Inducer Motor Capacitor: ✔ (numerical entry) uf
+					Blower Amps: (numerical entry)
+					Blower Capacitor: (numerical entry, or N/A)
+					Replaced Blower Capacitor: ✔ (numerical entry) uf
+					Evap Coil Clean:
+						Yes: ✔
+						No: Brushed Evap Coil, Sprayed Evap Coil, Pulled And Cleaned Evap Coil (multi choice)
+					Blower Motor Clean:
+						Yes: ✔
+						No: Pulled And Cleaned Blower Wheel, Could Not Pull And Clean Blower Wheel (include reason)
+					Cleared Condensate Drain:
+						Yes: ✔
+						No: Could Not Clear Condensate Drain (include reason)
+					Insulated Condensate Drain: ✔
+					Insulated Suction Line: ✔
+					Reglued Cabinet Door Insulation: ✔
+					Other: (text input)
+				Outdoor:
+					Condenser Coil Clean:
+						Yes: ✔
+						No: Cleaned Condenser Coil 
+					Dual Capacitor:
+						Compressor: (numerical entry) uf
+						Fan: (numerical entry) uf 
+					Replaced Dual Capacitor: ✔ (numerical entry) uf
+					Compressor Run Capacitor: (numerical entry) uf, or N/A 
+					Replaced Compressor Run Capacitor: ✔ (numerical entry) uf
+					Fan Run Capacitor: (numerical entry) uf, or N/A 
+					Replaced Fan Run Capacitor: ✔ (numerical entry) uf
+					Compressor Amps: (numerical entry)
+					Fan Amps: (numerical entry)
+					Operating Pressures: (numerical entry) / (numerical entry)
+					Refrigerant Type: (text input)
+					Superheat: (numerical entry) or N/A
+					Subcool: (numerical entry) or N/A 
+					Suction Line Temp: (numerical entry) degrees farenheit
+					Liquid Line Temp: (numerical entry) degrees farenheit 
+					Indoor Ambient Temp: (numerical entry) degrees farenheit
+					Outdoor Ambient Temp: (numerical entry) degrees farenheit
+				Other Notes: (text input)
+			Dual Fuel:
+				Indoor:
+					Cleaned Flame Sensor: ✔
+					Gas Pressure In: (numerical entry) in wc
+					Gas Pressure Out: (numerical entry) in wc 
+					Inducer Motor Amps: (numerical entry)
+					Replaced Inducer Motor Capacitor: ✔ (numerical entry) uf
+					Blower Amps: (numerical entry)
+					Blower Capacitor: (numerical entry, or N/A)
+					Replaced Blower Capacitor: ✔ (numerical entry) uf
+					Evap Coil Clean:
+						Yes: ✔
+						No: Brushed Evap Coil, Sprayed Evap Coil, Pulled And Cleaned Evap Coil (multi choice)
+					Blower Motor Clean:
+						Yes: ✔
+						No: Pulled And Cleaned Blower Wheel, Could Not Pull And Clean Blower Wheel (include reason)
+					Cleared Condensate Drain:
+						Yes: ✔
+						No: Could Not Clear Condensate Drain (include reason)
+					Insulated Condensate Drain: ✔
+					Insulated Suction Line: ✔
+					Reglued Cabinet Door Insulation: ✔
+					Other: (text input)
+				Outdoor:
+					Condenser Coil Clean:
+						Yes: ✔
+						No: Cleaned Condenser Coil 
+					Dual Capacitor:
+						Compressor: (numerical entry) uf
+						Fan: (numerical entry) uf 
+					Replaced Dual Capacitor: ✔ (numerical entry) uf
+					Compressor Run Capacitor: (numerical entry) uf, or N/A 
+					Replaced Compressor Run Capacitor: ✔ (numerical entry) uf
+					Fan Run Capacitor: (numerical entry) uf, or N/A 
+					Replaced Fan Run Capacitor: ✔ (numerical entry) uf
+					Compressor Amps: (numerical entry)
+					Fan Amps: (numerical entry)
+					Operating Pressures: (numerical entry) / (numerical entry)
+					Refrigerant Type: (text input)
+					Superheat: (numerical entry) or N/A
+					Subcool: (numerical entry) or N/A 
+					Suction Line Temp: (numerical entry) degrees farenheit
+					Liquid Line Temp: (numerical entry) degrees farenheit 
+					Indoor Ambient Temp: (numerical entry) degrees farenheit
+					Outdoor Ambient Temp: (numerical entry) degrees farenheit
+				Other Notes: (text input)
