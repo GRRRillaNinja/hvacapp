@@ -218,8 +218,15 @@ body {
     border-radius: var(--radius);
 }
 
-.conditional.visible {
+.conditional.visible,
+.visible {
     display: block !important;
+}
+
+.yn-row {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
 }
 
 /* ─────────────────────────────────────────────────────────── */
