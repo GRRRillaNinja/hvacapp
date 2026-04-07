@@ -47,7 +47,8 @@
       "mcp__claude_ai_Vercel__get_deployment",
       "Bash(grep -v \"^Retrieving\\\\|^curl\\\\|^$\")",
       "Bash(git add:*)",
-      "Bash(git commit -m ':*)"
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)"
     ]
   }
 }
