@@ -43,7 +43,11 @@
       "mcp__claude_ai_Vercel__list_deployments",
       "Bash(/c/xampp/htdocs/hvacapp/REBUILD_PLAN.md:*)",
       "mcp__claude_ai_Supabase__list_tables",
-      "Bash(head -20 __NEW_LINE_79adb642254177bf__ echo \"\" echo \"Conditional checkboxes \\(replaced capacitor, etc\\):\" grep 'i_replaced_blower_cap_conditional\\\\|i_evap_coil_clean_conditional' C:/xampp/htdocs/hvacapp/public/job_form.html)"
+      "Bash(head -20 __NEW_LINE_79adb642254177bf__ echo \"\" echo \"Conditional checkboxes \\(replaced capacitor, etc\\):\" grep 'i_replaced_blower_cap_conditional\\\\|i_evap_coil_clean_conditional' C:/xampp/htdocs/hvacapp/public/job_form.html)",
+      "mcp__claude_ai_Vercel__get_deployment",
+      "Bash(grep -v \"^Retrieving\\\\|^curl\\\\|^$\")",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)"
     ]
   }
 }

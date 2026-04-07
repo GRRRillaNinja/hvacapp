@@ -1,23 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="nocturne">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#ffffff">
-    <title>HVAC Jobs</title>
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>HVAC Tech</title>
     <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body class="jobs-page">
-    <header class="app-header">
-        <h1>HVAC Tech</h1>
-        <a href="job_form.html" class="btn btn-primary">+ New Job</a>
-    </header>
+<body class="has-bottom-nav">
 
-    <main class="jobs-container">
-        <div class="loading">Loading jobs...</div>
-    </main>
+<header class="app-header">
+    <h1>&#128295; HVAC Tech</h1>
+    <div class="header-actions">
+        <span id="header-date"></span>
+    </div>
+</header>
 
-    <script src="assets/js/app.js"></script>
+<div class="job-list" id="job-list">
+    <div class="loading-spinner"><div class="spinner"></div></div>
+</div>
+
+<a href="job_form.php" id="fab-add" class="fab" title="Add Job">+</a>
+
+<div class="toast" id="toast"></div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+    <a href="/" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Jobs
+    </a>
+    <a href="/reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Reports
+    </a>
+</nav>
+
+<script src="assets/js/app.js?v=2"></script>
 </body>
 </html>

@@ -20,6 +20,10 @@
       "dest": "server.js"
     },
     {
+      "src": "/reports",
+      "dest": "/public/reports.html"
+    },
+    {
       "src": "/job_form\\.(html|php)",
       "dest": "/public/job_form.html"
     },

@@ -3,21 +3,529 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#ffffff">
-    <title>Job Details</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    <title>Job Detail - HVAC Tech</title>
     <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body class="view-page">
-    <header class="form-header">
-        <button onclick="history.back()" class="btn-back">←</button>
-        <h1>Job Details</h1>
-    </header>
+<body>
 
-    <main id="view-container" class="form-container">
-        <div class="loading">Loading...</div>
-    </main>
+<header class="form-header">
+    <a href="/" class="back-btn" title="Back">&#8592;</a>
+    <h1>Job Detail</h1>
+</header>
 
-    <script src="assets/js/view.js"></script>
+<div id="view-content">
+    <div class="loading-spinner"><div class="spinner"></div></div>
+</div>
+
+<script>
+const TYPE_LABELS = {
+    maintenance_first_time: 'Maintenance \u00b7 First Time',
+    maintenance_renewal:    'Maintenance \u00b7 Renewal',
+    maintenance_check:      'Maintenance \u00b7 Check',
+    filter_change:          'Filter Change',
+    service_call:           'Service Call',
+};
+const SYS_LABELS = {
+    electric_heat_pump: 'Electric Heat Pump',
+    gas_ac:             'Gas / AC',
+    electric_ac:        'Electric / AC',
+    dual_fuel:          'Dual Fuel',
+};
+const STATUS_LABELS = { pending: 'Pending', in_progress: 'In Progress', complete: 'Complete' };
+
+function esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function row(label, value, cls) {
+    if (value === null || value === undefined || value === '' || value === false) return '';
+    const c = cls ? `view-row-value ${cls}` : 'view-row-value';
+    return `<div class="view-row"><span class="view-row-label">${esc(label)}</span><span class="${c}">${esc(value)}</span></div>`;
+}
+
+// Two values side by side in a stat grid cell
+function stat(label, value, unit) {
+    if (value === null || value === undefined || value === '') return '';
+    return `<div class="stat-cell"><div class="stat-label">${esc(label)}</div><div class="stat-value">${esc(String(value))}${unit ? `<span class="stat-unit">${esc(unit)}</span>` : ''}</div></div>`;
+}
+
+// Wrap stat cells in a grid row
+function statRow(...cells) {
+    const filled = cells.filter(Boolean);
+    if (!filled.length) return '';
+    return `<div class="stat-grid">${filled.join('')}</div>`;
+}
+
+// Colored yes/no badge
+function badge(val, labelYes, labelNo) {
+    if (val === null || val === undefined || val === '') return '';
+    if (val === true || val === 'yes') return `<span class="status-badge badge-yes">\u2714 ${esc(labelYes || 'Yes')}</span>`;
+    return `<span class="status-badge badge-no">\u2716 ${esc(labelNo || 'No')}</span>`;
+}
+
+function naVal(val, na, unit) {
+    if (na) return 'N/A';
+    if (val === null || val === undefined || val === '') return '';
+    return val + (unit ? ' ' + unit : '');
+}
+
+function naValRaw(val, na) {
+    if (na) return null; // returns null so stat() skips it gracefully with 'N/A' shown inline
+    return (val === null || val === undefined || val === '') ? null : val;
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// Get job ID from URL
+const params = new URLSearchParams(window.location.search);
+const jobId = params.get('id');
+if (!jobId) { window.location.href = '/'; }
+
+let _county = null;
+
+async function loadJob() {
+    try {
+        const res = await fetch(`api/jobs.php?id=${jobId}`);
+        const job = await res.json();
+        if (job.error) throw new Error(job.error);
+        renderJob(job);
+    } catch (e) {
+        document.getElementById('view-content').innerHTML =
+            `<div class="empty-state"><p>Error: ${esc(e.message)}</p></div>`;
+    }
+}
+
+function renderJob(job) {
+    const data = job.job_data || {};
+    const isMaint = (job.job_type || '').startsWith('maintenance_');
+
+    const addr = [job.address_line1, job.address_line2].filter(Boolean).join(' ');
+    const mapsUrl = addr ? 'https://maps.google.com/?q=' + encodeURIComponent(addr) : null;
+    const telUrl = job.phone ? 'tel:' + job.phone.replace(/\D/g, '') : null;
+
+    // Extract system instances from data keys
+    const systemInstances = {};
+    const sysTypePattern = /^(electric_heat_pump|gas_ac|electric_ac|dual_fuel)_(\d+)_(indoor|outdoor)$/;
+    for (const [key, val] of Object.entries(data)) {
+        if (val && typeof val === 'object' && !Array.isArray(val)) {
+            const m = key.match(sysTypePattern);
+            if (m) {
+                const sysType = m[1], unitNum = m[2], section = m[3];
+                const instance = `${sysType}_${unitNum}`;
+                if (!systemInstances[instance]) {
+                    systemInstances[instance] = { sysType, unitNum };
+                }
+                systemInstances[instance][`${section}_data`] = val;
+                systemInstances[instance][`${section}_designation`] = val.designation || '';
+            }
+        }
+    }
+    const isMaintData = Object.keys(systemInstances).length > 0;
+
+    let html = '';
+
+    // Hero block
+    html += `<div class="view-hero">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem">
+            <div>
+                <div class="view-hero-name">${esc(job.customer_name)}</div>
+                ${addr ? `<div class="view-hero-addr">${esc(addr)}</div>` : ''}
+            </div>
+            <a href="job_form.php?id=${job.id}" class="btn btn-ghost btn-sm">&#9998; Edit</a>
+        </div>
+        <div class="view-hero-actions">
+            ${telUrl ? `<a href="${telUrl}" class="btn btn-call">&#128222; Call</a>` : ''}
+            ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" class="btn btn-map">&#128205; Maps</a>` : ''}
+        </div>
+    </div>`;
+
+    // Customer Info
+    const addrFull = [job.address_line1, job.address_line2].filter(Boolean).join(', ');
+    html += `<div class="view-section">
+        <div class="section-title">Customer</div>
+        <div class="info-card">
+            ${job.customer_name ? `<div class="info-row"><span class="info-icon">&#128100;</span><span class="info-text">${esc(job.customer_name)}</span></div>` : ''}
+            ${addrFull ? `<div class="info-row"><span class="info-icon">&#128205;</span><span class="info-text">${esc(addrFull)}</span></div>` : ''}
+            ${job.phone ? `<div class="info-row"><span class="info-icon">&#128222;</span><span class="info-text"><a href="tel:${esc(job.phone.replace(/\D/g,''))}" style="color:inherit">${esc(job.phone)}</a></span></div>` : ''}
+            ${(job.address_line1 && job.address_line2) ? `<div class="info-row"><span class="info-icon">&#127961;</span><span class="info-text" id="county-value" style="color:var(--text-tertiary);font-style:italic">Looking up county...</span></div>` : ''}
+        </div>
+    </div>`;
+
+    // Tax Calculator placeholder
+    html += `<div class="view-section" id="tax-calculator" style="display:none">
+        <div class="section-title">&#128181; Tax Calculator</div>
+        <div class="field-group">
+            <label class="field-label">Bill Amount</label>
+            <div class="input-row">
+                <span class="input-unit">$</span>
+                <input class="field-input" type="number" id="tax-bill" step="0.01" min="0" placeholder="0.00" oninput="calcTax()">
+            </div>
+        </div>
+        <div class="field-group">
+            <label class="field-label">Tax Rate <span id="tax-county-label" style="font-weight:400;color:var(--text-muted)"></span></label>
+            <div class="input-row">
+                <input class="field-input" type="number" id="tax-rate" step="0.001" min="0" placeholder="0.000" oninput="calcTax()" style="max-width:120px">
+                <span class="input-unit">%</span>
+                <button class="btn btn-sm" style="background:var(--blue-dim);color:var(--blue);white-space:nowrap" onclick="saveRate()">Save Rate</button>
+            </div>
+        </div>
+        <div class="view-row">
+            <span class="view-row-label">Tax Amount</span>
+            <span class="view-row-value" id="tax-amount" style="font-size:1rem">\u2014</span>
+        </div>
+        <div class="view-row">
+            <span class="view-row-label" style="font-weight:700">Total</span>
+            <span class="view-row-value" id="tax-total">\u2014</span>
+        </div>
+    </div>`;
+
+    // Job Info
+    html += `<div class="view-section">
+        <div class="section-title">Job Info</div>
+        ${row('Date', formatDate(job.job_date))}
+        ${row('Type', TYPE_LABELS[job.job_type] || job.job_type)}
+        ${row('Status', STATUS_LABELS[job.status] || job.status)}
+    </div>`;
+
+    // Notes for non-maintenance jobs
+    if (!isMaint && data.notes) {
+        html += `<div class="view-section">
+            <div class="section-title notes-title">Notes</div>
+            ${row('Notes', data.notes)}
+        </div>`;
+    }
+
+    // Maintenance data sections
+    if (isMaint && isMaintData) {
+        for (const [instance, sysInfo] of Object.entries(systemInstances)) {
+            const { sysType, unitNum } = sysInfo;
+            const isElectric = ['electric_heat_pump', 'electric_ac'].includes(sysType);
+            const isGas = ['gas_ac', 'dual_fuel'].includes(sysType);
+            const baseLabel = SYS_LABELS[sysType] + ' - Unit ' + unitNum;
+
+            if (isElectric) {
+                html += renderElectricIndoor(instance, sysInfo, data, baseLabel);
+                html += renderElectricOutdoor(instance, sysInfo, data, baseLabel);
+            }
+            if (isGas) {
+                html += renderGasIndoor(instance, sysInfo, data, baseLabel);
+                html += renderGasOutdoor(instance, sysInfo, data, baseLabel);
+            }
+        }
+    }
+
+    // Other notes for maintenance
+    if (isMaint && data.other_notes) {
+        html += `<div class="view-section">
+            <div class="section-title notes-title">Other Notes</div>
+            ${row('Notes', data.other_notes)}
+        </div>`;
+    }
+
+    html += '<div style="height:1.5rem"></div>';
+
+    document.getElementById('view-content').innerHTML = html;
+
+    // Kick off county lookup
+    if (job.address_line1 && job.address_line2) {
+        lookupCounty(job.address_line1, job.address_line2);
+    }
+}
+
+// ── Electric Indoor ──────────────────────────────────────
+function renderElectricIndoor(instance, sysInfo, data, baseLabel) {
+    const d = sysInfo.indoor_data || data[`${instance}_indoor`] || {};
+    const designation = sysInfo.indoor_designation || '';
+    let label = baseLabel + ' (Indoor)';
+    if (designation) label += ' \u2014 ' + designation;
+
+    let h = `<div class="view-section"><div class="section-title indoor-title">${esc(label)}</div>`;
+
+    // Heat strip
+    const circuit = d.heat_strip_circuit;
+    if (circuit === 'single') {
+        h += statRow(stat('Heat Strip', d.heat_strip_amps, 'A'), stat('Circuit', 'Single'));
+    } else if (circuit === 'double') {
+        h += statRow(stat('Heat Strip L1', d.heat_strip_amps_1, 'A'), stat('Heat Strip L2', d.heat_strip_amps_2, 'A'));
+    }
+
+    h += statRow(
+        stat('Blower Amps', d.blower_amps, 'A'),
+        stat('Blower Cap', d.blower_cap_na ? 'N/A' : d.blower_cap, d.blower_cap_na ? '' : 'uf')
+    );
+    if (d.replaced_blower_cap) h += row('Replaced Blower Cap', (d.replaced_blower_cap_uf || '') + ' uf');
+
+    h += renderEvapCoil(d);
+    h += renderBlowerMotor(d);
+    h += renderCondensate(d);
+    h += renderChecklist([
+        [d.insulated_condensate, 'Insulated Condensate Drain'],
+        [d.insulated_suction, 'Insulated Suction Line'],
+        [d.reglued_cabinet, 'Reglued Cabinet Insulation'],
+    ]);
+    h += row('Other', d.electric_other);
+
+    h += '</div>';
+    return h;
+}
+
+// ── Electric Outdoor ──────────────────────────────────────
+function renderElectricOutdoor(instance, sysInfo, data, baseLabel) {
+    const d = sysInfo.outdoor_data || data[`${instance}_outdoor`] || {};
+    const designation = sysInfo.outdoor_designation || '';
+    let label = baseLabel + ' (Outdoor)';
+    if (designation) label += ' \u2014 ' + designation;
+
+    let h = `<div class="view-section"><div class="section-title outdoor-title">${esc(label)}</div>`;
+
+    h += renderCondenserClean(d);
+    h += renderCapacitors(d);
+
+    h += statRow(stat('Compressor Amps', d.comp_amps, 'A'), stat('Fan Amps', d.fan_amps, 'A'));
+
+    if (d.pressure_low != null || d.pressure_high != null) {
+        h += statRow(stat('Pressure Low', d.pressure_low, 'PSI'), stat('Pressure High', d.pressure_high, 'PSI'));
+    }
+
+    if (d.refrigerant) h += row('Refrigerant', d.refrigerant);
+
+    h += statRow(
+        stat('Superheat', d.superheat_na ? 'N/A' : d.superheat, d.superheat_na ? '' : '\u00b0F'),
+        stat('Subcool',   d.subcool_na   ? 'N/A' : d.subcool,   d.subcool_na   ? '' : '\u00b0F')
+    );
+    h += statRow(stat('Suction Line', d.suction_temp, '\u00b0F'), stat('Liquid Line', d.liquid_temp, '\u00b0F'));
+    h += statRow(stat('Indoor Ambient', d.indoor_ambient, '\u00b0F'), stat('Outdoor Ambient', d.outdoor_ambient, '\u00b0F'));
+
+    h += '</div>';
+    return h;
+}
+
+// ── Gas/Dual Fuel Indoor ──────────────────────────────────
+function renderGasIndoor(instance, sysInfo, data, baseLabel) {
+    const d = sysInfo.indoor_data || data[`${instance}_indoor`] || {};
+    const designation = sysInfo.indoor_designation || '';
+    let label = baseLabel + ' (Indoor)';
+    if (designation) label += ' \u2014 ' + designation;
+
+    let h = `<div class="view-section"><div class="section-title indoor-title">${esc(label)}</div>`;
+
+    h += renderChecklist([[d.cleaned_flame_sensor, 'Cleaned Flame Sensor']]);
+    h += statRow(stat('Gas Pressure In', d.gas_pressure_in, 'in wc'), stat('Gas Pressure Out', d.gas_pressure_out, 'in wc'));
+    h += statRow(
+        stat('Inducer Amps', d.inducer_amps, 'A'),
+        stat('Blower Amps', d.blower_amps, 'A')
+    );
+    h += statRow(
+        stat('Blower Cap', d.blower_cap_na ? 'N/A' : d.blower_cap, d.blower_cap_na ? '' : 'uf')
+    );
+    if (d.replaced_inducer_cap) h += row('Replaced Inducer Cap', (d.replaced_inducer_cap_uf || '') + ' uf');
+    if (d.replaced_blower_cap) h += row('Replaced Blower Cap', (d.replaced_blower_cap_uf || '') + ' uf');
+
+    h += renderEvapCoil(d);
+    h += renderBlowerMotor(d);
+    h += renderCondensate(d);
+    h += renderChecklist([
+        [d.insulated_condensate, 'Insulated Condensate Drain'],
+        [d.insulated_suction, 'Insulated Suction Line'],
+        [d.reglued_cabinet, 'Reglued Cabinet Insulation'],
+    ]);
+    h += row('Other', d.indoor_other);
+
+    h += '</div>';
+    return h;
+}
+
+// ── Gas/Dual Fuel Outdoor ──────────────────────────────────
+function renderGasOutdoor(instance, sysInfo, data, baseLabel) {
+    const d = sysInfo.outdoor_data || data[`${instance}_outdoor`] || {};
+    const designation = sysInfo.outdoor_designation || '';
+    let label = baseLabel + ' (Outdoor)';
+    if (designation) label += ' \u2014 ' + designation;
+
+    let h = `<div class="view-section"><div class="section-title outdoor-title">${esc(label)}</div>`;
+
+    h += renderCondenserClean(d);
+    h += renderCapacitors(d);
+
+    h += statRow(stat('Compressor Amps', d.comp_amps, 'A'), stat('Fan Amps', d.fan_amps, 'A'));
+
+    if (d.pressure_low != null || d.pressure_high != null) {
+        h += statRow(stat('Pressure Low', d.pressure_low, 'PSI'), stat('Pressure High', d.pressure_high, 'PSI'));
+    }
+
+    if (d.refrigerant) h += row('Refrigerant', d.refrigerant);
+
+    h += statRow(
+        stat('Superheat', d.superheat_na ? 'N/A' : d.superheat, d.superheat_na ? '' : '\u00b0F'),
+        stat('Subcool',   d.subcool_na   ? 'N/A' : d.subcool,   d.subcool_na   ? '' : '\u00b0F')
+    );
+    h += statRow(stat('Suction Line', d.suction_temp, '\u00b0F'), stat('Liquid Line', d.liquid_temp, '\u00b0F'));
+    h += statRow(stat('Indoor Ambient', d.indoor_ambient, '\u00b0F'), stat('Outdoor Ambient', d.outdoor_ambient, '\u00b0F'));
+
+    h += '</div>';
+    return h;
+}
+
+// ── Shared render helpers ──────────────────────────────────
+
+// Compact checklist strip — only shows items that are true
+function renderChecklist(items) {
+    const active = items.filter(([val]) => val);
+    if (!active.length) return '';
+    const chips = active.map(([, label]) =>
+        `<span class="checklist-chip">\u2714 ${esc(label)}</span>`
+    ).join('');
+    return `<div class="checklist-row">${chips}</div>`;
+}
+
+function renderEvapCoil(d) {
+    if (!d.evap_coil_clean) return '';
+    const isYes = d.evap_coil_clean === 'yes';
+    let sub = '';
+    if (!isYes) {
+        const acts = [];
+        if (d.evap_brushed) acts.push('Brushed');
+        if (d.evap_sprayed) acts.push('Sprayed');
+        if (d.evap_pulled_cleaned) acts.push('Pulled & Cleaned');
+        if (acts.length) sub = ` \u2014 ${acts.join(', ')}`;
+    }
+    return `<div class="view-row"><span class="view-row-label">Evap Coil Clean</span><span class="view-row-value">${badge(isYes)}${sub ? `<span style="font-size:0.85rem;color:var(--text-secondary)">${esc(sub)}</span>` : ''}</span></div>`;
+}
+
+function renderBlowerMotor(d) {
+    if (!d.blower_motor_clean) return '';
+    const isYes = d.blower_motor_clean === 'yes';
+    let sub = '';
+    if (!isYes) {
+        const act = d.blower_motor_action || '';
+        const reason = d.blower_motor_reason || '';
+        sub = act === 'pulled_cleaned'
+            ? ' \u2014 Pulled & Cleaned Blower Wheel'
+            : ' \u2014 Could Not Pull & Clean' + (reason ? ': ' + reason : '');
+    }
+    return `<div class="view-row"><span class="view-row-label">Blower Motor Clean</span><span class="view-row-value">${badge(isYes)}${sub ? `<span style="font-size:0.85rem;color:var(--text-secondary)">${esc(sub)}</span>` : ''}</span></div>`;
+}
+
+function renderCondensate(d) {
+    if (!d.condensate) return '';
+    const isYes = d.condensate === 'yes';
+    let sub = '';
+    if (!isYes) {
+        const r = d.condensate_reason || '';
+        sub = ' \u2014 Could Not Clear' + (r ? ': ' + r : '');
+    }
+    return `<div class="view-row"><span class="view-row-label">Condensate Drain</span><span class="view-row-value">${badge(isYes, 'Cleared', 'Not Cleared')}${sub ? `<span style="font-size:0.85rem;color:var(--text-secondary)">${esc(sub)}</span>` : ''}</span></div>`;
+}
+
+function renderCondenserClean(d) {
+    if (!d.condenser_clean) return '';
+    const isYes = d.condenser_clean === 'yes';
+    const sub = (!isYes && d.condenser_cleaned) ? ' \u2014 Cleaned on site' : '';
+    return `<div class="view-row"><span class="view-row-label">Condenser Coil Clean</span><span class="view-row-value">${badge(isYes)}${sub ? `<span style="font-size:0.85rem;color:var(--text-secondary)">${esc(sub)}</span>` : ''}</span></div>`;
+}
+
+function renderCapacitors(d) {
+    let h = '';
+    if (d.cap_type === 'dual') {
+        h += statRow(
+            stat('Dual Cap \u2014 Comp', d.dual_cap_na ? 'N/A' : d.dual_cap_comp, d.dual_cap_na ? '' : 'uf'),
+            stat('Dual Cap \u2014 Fan',  d.dual_cap_na ? 'N/A' : d.dual_cap_fan,  d.dual_cap_na ? '' : 'uf')
+        );
+        if (d.replaced_dual_cap) h += row('Replaced Dual Cap', (d.replaced_dual_cap_uf || '') + ' uf');
+    } else if (d.cap_type === 'run') {
+        h += statRow(
+            stat('Comp Run Cap', d.comp_run_cap_na ? 'N/A' : d.comp_run_cap, d.comp_run_cap_na ? '' : 'uf'),
+            stat('Fan Run Cap',  d.fan_run_cap_na  ? 'N/A' : d.fan_run_cap,  d.fan_run_cap_na  ? '' : 'uf')
+        );
+        if (d.replaced_comp_run_cap) h += row('Replaced Comp Run Cap', (d.replaced_comp_run_cap_uf || '') + ' uf');
+        if (d.replaced_fan_run_cap)  h += row('Replaced Fan Run Cap',  (d.replaced_fan_run_cap_uf  || '') + ' uf');
+    }
+    return h;
+}
+
+// ── County lookup ────────────────────────────────────────
+function lookupCounty(street, addr2) {
+    const countyEl = document.getElementById('county-value');
+    if (!countyEl) return;
+
+    const fullAddress = [street, addr2].filter(Boolean).join(', ');
+    fetch(`api/county.php?address=${encodeURIComponent(fullAddress)}`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.county) {
+                const label = data.inCityLimits && data.place
+                    ? `${data.place} (${data.county} County)`
+                    : `${data.county} County`;
+                countyEl.textContent = label;
+                countyEl.style.color = '';
+                countyEl.style.fontStyle = '';
+                _county = data.county;
+                loadTaxRate(data.county, data.place);
+            } else {
+                countyEl.textContent = data.error || 'County not found';
+                countyEl.style.color = 'var(--text-muted)';
+                showCalculator('');
+            }
+        })
+        .catch(() => {
+            countyEl.textContent = 'Lookup failed';
+        });
+}
+
+function loadTaxRate(county, place) {
+    let url = `api/tax_rates.php?county=${encodeURIComponent(county)}`;
+    if (place) url += `&place=${encodeURIComponent(place)}`;
+    fetch(url)
+        .then(r => r.json())
+        .then(data => showCalculator(county, data.rate))
+        .catch(() => showCalculator(county, null));
+}
+
+function showCalculator(county, rate) {
+    const calc = document.getElementById('tax-calculator');
+    if (!calc) return;
+    calc.style.display = '';
+    document.getElementById('tax-county-label').textContent = county ? `(${county})` : '';
+    if (rate !== null && rate !== undefined) {
+        document.getElementById('tax-rate').value = rate;
+        calcTax();
+    }
+}
+
+function calcTax() {
+    const bill = parseFloat(document.getElementById('tax-bill').value) || 0;
+    const rate = parseFloat(document.getElementById('tax-rate').value) || 0;
+    const tax = bill * (rate / 100);
+    const total = bill + tax;
+    document.getElementById('tax-amount').textContent = bill > 0 ? '$' + tax.toFixed(2) : '\u2014';
+    document.getElementById('tax-total').textContent = bill > 0 ? '$' + total.toFixed(2) : '\u2014';
+}
+
+function saveRate() {
+    const rate = parseFloat(document.getElementById('tax-rate').value);
+    if (!_county || isNaN(rate) || rate <= 0) return;
+    fetch('api/tax_rates.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ county: _county, rate }),
+    }).then(() => {
+        const btn = document.querySelector('#tax-calculator .btn');
+        const orig = btn.textContent;
+        btn.textContent = 'Saved \u2714';
+        setTimeout(() => btn.textContent = orig, 2000);
+    });
+}
+
+// ── Start ────────────────────────────────────────────────
+loadJob();
+</script>
+
 </body>
 </html>

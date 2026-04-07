@@ -154,6 +154,12 @@ app.put('/api/jobs.php', async (req, res) => {
             if (sessionId) q = q.eq('session_id', sessionId);
             const { error } = await q;
             if (error) throw error;
+        // Job-type-only patch (used to remove from maintenance report without deleting)
+        } else if (input.job_type && Object.keys(input).length === 2) {
+            let q = supabase.from('jobs').update({ job_type: input.job_type }).eq('id', id);
+            if (sessionId) q = q.eq('session_id', sessionId);
+            const { error } = await q;
+            if (error) throw error;
         } else {
             const row = {
                 job_date: input.job_date || todayStr(),
@@ -199,30 +205,37 @@ app.delete('/api/jobs.php', async (req, res) => {
 // ═════════════════════════════════════════════════════════════
 
 // GET /api/county.php?address=full+address+here
-// Uses US Census Bureau geocoder (free, no API key needed)
+// Uses Nominatim (OpenStreetMap) geocoder — free, no API key needed
 app.get('/api/county.php', async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     try {
         const address = (req.query.address || '').trim();
         if (!address) return res.status(400).json({ error: 'address required' });
 
-        const url = `https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress?address=${encodeURIComponent(address)}&benchmark=Public_AR_Current&vintage=Current_Current&format=json`;
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&countrycodes=us&format=json&addressdetails=1&limit=1`;
 
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            headers: { 'User-Agent': 'HVACTechApp/1.0' },
+        });
         const data = await response.json();
 
-        const match = data?.result?.addressMatches?.[0];
+        const match = data?.[0];
         if (!match) return res.json({ county: null, error: 'Address not found' });
 
-        const county = match.geographies?.Counties?.[0]?.BASENAME || null;
-        const places = match.geographies?.['Incorporated Places'] || [];
-        const place = places.length > 0 ? places[0].BASENAME : null;
+        const addr = match.address || {};
+        // Nominatim returns county as addr.county (may include " County" suffix)
+        let county = addr.county || null;
+        if (county && county.toLowerCase().endsWith(' county')) {
+            county = county.slice(0, -7).trim();
+        }
+        // City/place: city > town > village > hamlet
+        const place = addr.city || addr.town || addr.village || addr.hamlet || null;
         res.json({
             county,
             place,
             inCityLimits: !!place,
-            matchedAddress: match.matchedAddress,
-            coordinates: match.coordinates,
+            matchedAddress: match.display_name,
+            coordinates: { x: parseFloat(match.lon), y: parseFloat(match.lat) },
         });
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -294,6 +307,181 @@ app.post('/api/tax_rates.php', async (req, res) => {
             .upsert({ county, place, rate, updated_at: new Date().toISOString() }, { onConflict: 'county,place' });
         if (error) throw error;
         res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// ═════════════════════════════════════════════════════════════
+// TIME ENTRIES API
+// ═════════════════════════════════════════════════════════════
+
+// GET /api/time.php
+//   ?active=1                      → current open entry for session
+//   ?date=YYYY-MM-DD               → all entries for a day
+//   ?week_start=YYYY-MM-DD         → all entries for a Mon–Sun week
+function parseLocalDate(str) {
+    // str is YYYY-MM-DD — treat as local midnight
+    const [y, m, d] = str.split('-').map(Number);
+    return new Date(y, m - 1, d);
+}
+
+app.get('/api/time.php', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    const sessionId = getSessionId(req);
+    if (!sessionId) return res.status(400).json({ error: 'session required' });
+
+    try {
+        // Active (open) entry
+        if (req.query.active) {
+            const { data, error } = await supabase
+                .from('time_entries')
+                .select('*')
+                .eq('session_id', sessionId)
+                .is('clock_out', null)
+                .order('clock_in', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+            if (error) throw error;
+            return res.json({ entry: data });
+        }
+
+        // Week range
+        if (req.query.week_start) {
+            const start = parseLocalDate(req.query.week_start);
+            const end   = new Date(start); end.setDate(end.getDate() + 7);
+            const { data, error } = await supabase
+                .from('time_entries')
+                .select('*')
+                .eq('session_id', sessionId)
+                .gte('clock_in', start.toISOString())
+                .lt('clock_in', end.toISOString())
+                .order('clock_in', { ascending: true });
+            if (error) throw error;
+            return res.json({ entries: data });
+        }
+
+        // Single day
+        if (req.query.date) {
+            const start = parseLocalDate(req.query.date);
+            const end   = new Date(start); end.setDate(end.getDate() + 1);
+            const { data, error } = await supabase
+                .from('time_entries')
+                .select('*')
+                .eq('session_id', sessionId)
+                .gte('clock_in', start.toISOString())
+                .lt('clock_in', end.toISOString())
+                .order('clock_in', { ascending: true });
+            if (error) throw error;
+            return res.json({ entries: data });
+        }
+
+        return res.status(400).json({ error: 'date, week_start, or active required' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// POST /api/time.php — clock in
+// Body: { job_id (optional), job_address (optional) }
+app.post('/api/time.php', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    const sessionId = getSessionId(req);
+    if (!sessionId) return res.status(400).json({ error: 'session required' });
+    try {
+        // Close any open entry first (safety)
+        await supabase
+            .from('time_entries')
+            .update({ clock_out: new Date().toISOString() })
+            .eq('session_id', sessionId)
+            .is('clock_out', null);
+
+        const { job_id, job_address } = req.body || {};
+        const { data, error } = await supabase
+            .from('time_entries')
+            .insert({
+                session_id:  sessionId,
+                job_id:      job_id || null,
+                job_address: job_address || null,
+                clock_in:    new Date().toISOString(),
+            })
+            .select()
+            .single();
+        if (error) throw error;
+        res.json({ entry: data });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// PUT /api/time.php — clock out
+// Body: { id }
+app.put('/api/time.php', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    const sessionId = getSessionId(req);
+    if (!sessionId) return res.status(400).json({ error: 'session required' });
+    try {
+        const { id } = req.body || {};
+        if (!id) return res.status(400).json({ error: 'id required' });
+        const { data, error } = await supabase
+            .from('time_entries')
+            .update({ clock_out: new Date().toISOString() })
+            .eq('id', id)
+            .eq('session_id', sessionId)
+            .select()
+            .single();
+        if (error) throw error;
+        res.json({ entry: data });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// ═════════════════════════════════════════════════════════════
+// MAINTENANCE REPORT API
+// ═════════════════════════════════════════════════════════════
+
+// GET /api/reports/maintenance.php?month=YYYY-MM
+// Returns first-time and renewal system counts for the month
+app.get('/api/reports/maintenance.php', async (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    try {
+        const monthStr = (req.query.month || '').trim();
+        if (!monthStr || !/^\d{4}-\d{2}$/.test(monthStr)) {
+            return res.status(400).json({ error: 'month required (YYYY-MM)' });
+        }
+        const [year, month] = monthStr.split('-').map(Number);
+        const start = new Date(year, month - 1, 1);
+        const end   = new Date(year, month, 1);
+
+        const sessionId = getSessionId(req);
+        let q = supabase
+            .from('jobs')
+            .select('id, job_type, job_date, customer_name, address_line1, address_line2, job_data')
+            .in('job_type', ['maintenance_first_time', 'maintenance_renewal'])
+            .gte('job_date', start.toISOString().slice(0, 10))
+            .lt('job_date', end.toISOString().slice(0, 10))
+            .order('job_date', { ascending: true });
+        if (sessionId) q = q.eq('session_id', sessionId);
+        const { data, error } = await q;
+        if (error) throw error;
+
+        let firstTime = 0, renewal = 0;
+        const firstTimeJobs = [], renewalJobs = [];
+
+        for (const job of data) {
+            const d = job.job_data || {};
+            const systemKeys = Object.keys(d).filter(k => k.startsWith('system_count_'));
+            let count = systemKeys.length > 0
+                ? systemKeys.reduce((sum, k) => sum + (parseInt(d[k]) || 0), 0)
+                : parseInt(d.system_quantity) || 1;
+            const address = [job.address_line1, job.address_line2].filter(Boolean).join(', ') || job.customer_name || '—';
+            const entry = { id: job.id, address, systems: count, date: job.job_date };
+            if (job.job_type === 'maintenance_first_time') { firstTime += count; firstTimeJobs.push(entry); }
+            else { renewal += count; renewalJobs.push(entry); }
+        }
+
+        res.json({ month: monthStr, first_time: firstTime, renewal, total: firstTime + renewal, first_time_jobs: firstTimeJobs, renewal_jobs: renewalJobs });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

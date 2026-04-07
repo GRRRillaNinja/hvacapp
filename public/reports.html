@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f172a">
+<title>Reports - HVAC Tech</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="has-bottom-nav">
+
+<div class="page-header">
+    <h1>&#128202; Reports</h1>
+</div>
+
+<div class="page-body">
+
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('time', this)">&#128336; Weekly Time</button>
+        <button class="tab-btn" onclick="switchTab('maint', this)">&#128295; Maintenance</button>
+    </div>
+
+    <!-- ── WEEKLY TIME TAB ── -->
+    <div id="tab-time">
+        <div class="period-nav">
+            <button onclick="shiftWeek(-1)">&#8592;</button>
+            <span class="period-label" id="week-label"></span>
+            <button onclick="shiftWeek(1)">&#8594;</button>
+        </div>
+        <div id="time-report-body">
+            <div class="loading-spinner"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+    <!-- ── MAINTENANCE TAB ── -->
+    <div id="tab-maint" style="display:none">
+        <div class="period-nav">
+            <button onclick="shiftMonth(-1)">&#8592;</button>
+            <span class="period-label" id="month-label"></span>
+            <button onclick="shiftMonth(1)">&#8594;</button>
+        </div>
+        <div id="maint-report-body">
+            <div class="loading-spinner"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+    <a href="/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Jobs
+    </a>
+    <a href="/reports" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Reports
+    </a>
+</nav>
+
+<script src="assets/js/reports.js?v=2"></script>
+</body>
+</html>
