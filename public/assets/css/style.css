@@ -240,9 +240,11 @@ main {
     top: 0;
     left: 0;
     right: 0;
-    height: 0px;
+    bottom: 0;
     background: transparent;
     opacity: 0;
+    border-radius: 12px;
+    pointer-events: none;
 }
 
 .job-card:hover {
@@ -447,13 +449,14 @@ main {
     right: 0;
     bottom: 0;
     pointer-events: none;
-    border-radius: inherit;
+    border-radius: 12px;
+    z-index: 10;
     background: linear-gradient(
         90deg,
         transparent 0%,
-        transparent 30%,
-        rgba(255, 255, 255, 0.4) 50%,
-        transparent 70%,
+        transparent 25%,
+        rgba(255, 255, 255, 0.7) 50%,
+        transparent 75%,
         transparent 100%
     );
     background-size: 1000px 100%;
