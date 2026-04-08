@@ -131,6 +131,23 @@
 </select>
 <span style="width: 30px; text-align: center;">unit(s)</span>
 </div>
+<div style="display: flex; align-items: center; gap: 0.5rem;">
+<label style="flex: 1;">+ Mini Split</label>
+<select name="system_count_mini_split" style="width: 70px; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px;" onchange="onSystemCountChange()">
+<option value="0">0</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+<option value="10">10</option>
+</select>
+<span style="width: 30px; text-align: center;">unit(s)</span>
+</div>
 </div>
 </div>
 <div class="field-group">
@@ -849,6 +866,10 @@ Replaced Dual Capacitor
 </div>
 
 <!-- ── OTHER NOTES (maintenance) ── -->
+<div class="form-section" id="section-mini-splits" style="display:none">
+<div id="mini-splits-container"></div>
+</div>
+
 <div class="form-section" id="section-other-notes" style="display:none">
 <div class="section-title notes-title">Other Notes</div>
 <div class="field-group">

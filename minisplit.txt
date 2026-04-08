@@ -1,0 +1,39 @@
+Filters Clean?
+	Yes: checkbox
+	No: checkbox 
+	    Cleaned: checkbox
+
+Blower Wheel Clean?
+	Yes: checkbox
+	No: checkbox 
+	    Cleaned: checkbox
+
+Evap Coil Clean?
+	Yes: checkbox
+	No: checkbox 
+	    Cleaned: checkbox
+Condenser Coil?
+	Yes: checkbox
+	No: checkbox 
+	    Cleaned: checkbox
+
+Test Mode:
+	Heat: checkbox
+	    Blowing Hot?:
+		Yes: checkbox
+		No: checkbox
+	Cool: checkbox
+	    Blowing Cold?:
+		Yes: checkbox
+		No: checkbox
+
+Cleared Condensate Drain?
+	Yes: checkbox
+	No: checkbox
+
+Blower Speed Check:
+	Low: checkbox
+	Medium: checkbox
+	High: checkbox
+
+Other Notes: Text input

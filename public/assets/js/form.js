@@ -209,12 +209,13 @@ function onHeatStripCircuit(radio, prefix) {
 const jobTypeEl  = document.getElementById('job_type');
 
 const MAINT_TYPES = ['maintenance_first_time', 'maintenance_renewal', 'maintenance_check'];
-const SYSTEM_TYPES = ['electric_heat_pump', 'gas_ac', 'electric_ac', 'dual_fuel'];
+const SYSTEM_TYPES = ['electric_heat_pump', 'gas_ac', 'electric_ac', 'dual_fuel', 'mini_split'];
 const SYSTEM_LABELS = {
     'electric_heat_pump': 'Electric Heat Pump',
     'gas_ac': 'Gas / AC',
     'electric_ac': 'Electric / AC',
-    'dual_fuel': 'Dual Fuel'
+    'dual_fuel': 'Dual Fuel',
+    'mini_split': 'Mini Split'
 };
 
 jobTypeEl.addEventListener('change', onJobTypeChange);
@@ -270,6 +271,12 @@ function onSystemCountChange() {
         for (let unitNum = 1; unitNum <= count; unitNum++) {
             hasAnySystems = true;
             sysIndex++;
+
+            if (sysType === 'mini_split') {
+                // Mini splits are handled separately
+                continue;
+            }
+
             const si = Math.min(sysIndex, 6);
             const isElectric = sysType === 'electric_heat_pump' || sysType === 'electric_ac';
             const isGas = sysType === 'gas_ac' || sysType === 'dual_fuel';
@@ -306,6 +313,20 @@ function onSystemCountChange() {
             container.innerHTML += html;
         }
     });
+
+    // Handle mini splits separately
+    const miniSplitCount = parseInt(document.querySelector('[name="system_count_mini_split"]')?.value) || 0;
+    if (miniSplitCount > 0) {
+        hasAnySystems = true;
+        const miniSplitContainer = document.getElementById('mini-splits-container');
+        miniSplitContainer.innerHTML = '';
+        for (let unitNum = 1; unitNum <= miniSplitCount; unitNum++) {
+            miniSplitContainer.innerHTML += buildMiniSplitSection(unitNum);
+        }
+        show('section-mini-splits');
+    } else {
+        hide('section-mini-splits');
+    }
 
     if (hasAnySystems) {
         show('section-other-notes');
@@ -962,6 +983,143 @@ function buildGasOutdoorSection(unitNum, sysType, goPrefix, si) {
     return html;
 }
 
+function buildMiniSplitSection(unitNum) {
+    const prefix = `mini_split_${unitNum}`;
+    return `<div class="form-section" style="border-left: 5px solid #f59e0b;">
+    <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Mini Split Unit ${unitNum}</span>
+        <input type="text" name="${prefix}_location" placeholder="e.g., Master Bedroom" style="flex:1;max-width:250px;padding:0.4rem;border:1px solid var(--border-default);border-radius:4px;font-size:0.9rem;margin-left:1rem" />
+    </div>
+
+    <div class="field-group">
+        <label class="field-label">Filters Clean?</label>
+        <div class="yn-row">
+            <label class="yn-option"><input type="radio" name="${prefix}_filters_clean" value="yes"> Yes</label>
+            <label class="yn-option"><input type="radio" name="${prefix}_filters_clean" value="no"> No</label>
+        </div>
+        <div class="sub-fields" id="${prefix}_filters_no" style="display:none">
+            <label class="check-label"><input type="checkbox" name="${prefix}_filters_cleaned"> Cleaned</label>
+        </div>
+    </div>
+
+    <div class="field-group">
+        <label class="field-label">Blower Wheel Clean?</label>
+        <div class="yn-row">
+            <label class="yn-option"><input type="radio" name="${prefix}_blower_clean" value="yes"> Yes</label>
+            <label class="yn-option"><input type="radio" name="${prefix}_blower_clean" value="no"> No</label>
+        </div>
+        <div class="sub-fields" id="${prefix}_blower_no" style="display:none">
+            <label class="check-label"><input type="checkbox" name="${prefix}_blower_cleaned"> Cleaned</label>
+        </div>
+    </div>
+
+    <div class="field-group">
+        <label class="field-label">Evap Coil Clean?</label>
+        <div class="yn-row">
+            <label class="yn-option"><input type="radio" name="${prefix}_evap_coil_clean" value="yes"> Yes</label>
+            <label class="yn-option"><input type="radio" name="${prefix}_evap_coil_clean" value="no"> No</label>
+        </div>
+        <div class="sub-fields" id="${prefix}_evap_coil_no" style="display:none">
+            <label class="check-label"><input type="checkbox" name="${prefix}_evap_cleaned"> Cleaned</label>
+        </div>
+    </div>
+
+    <div class="field-group">
+        <label class="field-label">Condenser Coil Clean?</label>
+        <div class="yn-row">
+            <label class="yn-option"><input type="radio" name="${prefix}_condenser_coil_clean" value="yes"> Yes</label>
+            <label class="yn-option"><input type="radio" name="${prefix}_condenser_coil_clean" value="no"> No</label>
+        </div>
+        <div class="sub-fields" id="${prefix}_condenser_coil_no" style="display:none">
+            <label class="check-label"><input type="checkbox" name="${prefix}_condenser_cleaned"> Cleaned</label>
+        </div>
+    </div>
+
+    <div class="field-group">
+        <label class="field-label">Test Mode</label>
+        <div style="margin-top:0.5rem;">
+            <label class="check-label"><input type="checkbox" name="${prefix}_test_heat" onchange="onMiniSplitTestMode(this, '${prefix}')"> Heat Mode</label>
+            <div id="${prefix}_heat_mode" style="display:none; margin-left:1rem; margin-top:0.5rem;">
+                <label class="field-label" style="font-size:0.9rem;">Blowing Hot?</label>
+                <div class="yn-row">
+                    <label class="yn-option"><input type="radio" name="${prefix}_heat_blowing" value="yes"> Yes</label>
+                    <label class="yn-option"><input type="radio" name="${prefix}_heat_blowing" value="no"> No</label>
+                </div>
+            </div>
+        </div>
+        <div style="margin-top:0.5rem;">
+            <label class="check-label"><input type="checkbox" name="${prefix}_test_cool" onchange="onMiniSplitTestMode(this, '${prefix}')"> Cool Mode</label>
+            <div id="${prefix}_cool_mode" style="display:none; margin-left:1rem; margin-top:0.5rem;">
+                <label class="field-label" style="font-size:0.9rem;">Blowing Cold?</label>
+                <div class="yn-row">
+                    <label class="yn-option"><input type="radio" name="${prefix}_cool_blowing" value="yes"> Yes</label>
+                    <label class="yn-option"><input type="radio" name="${prefix}_cool_blowing" value="no"> No</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="field-group">
+        <label class="field-label">Cleared Condensate Drain?</label>
+        <div class="yn-row">
+            <label class="yn-option"><input type="radio" name="${prefix}_drain_cleared" value="yes"> Yes</label>
+            <label class="yn-option"><input type="radio" name="${prefix}_drain_cleared" value="no"> No</label>
+        </div>
+    </div>
+
+    <div class="field-group">
+        <label class="field-label">Blower Speed Check</label>
+        <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+            <label class="check-label"><input type="checkbox" name="${prefix}_speed_low"> Low</label>
+            <label class="check-label"><input type="checkbox" name="${prefix}_speed_medium"> Medium</label>
+            <label class="check-label"><input type="checkbox" name="${prefix}_speed_high"> High</label>
+        </div>
+    </div>
+
+    <div class="field-group">
+        <label class="field-label" for="${prefix}_notes">Other Notes</label>
+        <textarea class="field-input" id="${prefix}_notes" name="${prefix}_notes" rows="3" placeholder="Additional notes..."></textarea>
+    </div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────────
+// Mini split test mode handlers
+// ─────────────────────────────────────────────────
+function onMiniSplitTestMode(el, prefix) {
+    const heatCheckbox = document.querySelector(`[name="${prefix}_test_heat"]`);
+    const coolCheckbox = document.querySelector(`[name="${prefix}_test_cool"]`);
+    const heatModeDiv = document.getElementById(`${prefix}_heat_mode`);
+    const coolModeDiv = document.getElementById(`${prefix}_cool_mode`);
+
+    if (heatCheckbox?.checked) {
+        heatModeDiv.style.display = '';
+    } else {
+        heatModeDiv.style.display = 'none';
+    }
+
+    if (coolCheckbox?.checked) {
+        coolModeDiv.style.display = '';
+    } else {
+        coolModeDiv.style.display = 'none';
+    }
+}
+
+// Handle yes/no toggle for mini split sub-fields
+document.addEventListener('change', function(e) {
+    if (e.target.type === 'radio' && e.target.name) {
+        const name = e.target.name;
+        if (name.includes('_filters_clean') || name.includes('_blower_clean') ||
+            name.includes('_evap_coil_clean') || name.includes('_condenser_coil_clean')) {
+            const prefix = name.replace(/_filters_clean|_blower_clean|_evap_coil_clean|_condenser_coil_clean$/, '');
+            const noDiv = document.getElementById(`${prefix}_${name.split('_').pop()}_no`);
+            if (noDiv) {
+                noDiv.style.display = e.target.value === 'no' ? '' : 'none';
+            }
+        }
+    }
+});
+
 // ─────────────────────────────────────────────────
 // Collect all form data
 // ─────────────────────────────────────────────────
@@ -1360,6 +1518,17 @@ function populateForm(job) {
                 }
             } else if (key === `${prefix}_designation`) {
                 // Handle custom designation
+                setVal(key, d[key]);
+            }
+        }
+    }
+
+    // Populate mini split data
+    const miniSplitPattern = /^mini_split_(\d+)_(.+)$/;
+    for (const key in d) {
+        if (typeof d[key] === 'string' || typeof d[key] === 'number' || typeof d[key] === 'boolean') {
+            const m = key.match(miniSplitPattern);
+            if (m) {
                 setVal(key, d[key]);
             }
         }
