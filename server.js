@@ -80,11 +80,11 @@ app.get('/api/jobs.php', async (req, res) => {
         } else {
             const date = req.query.date || todayStr();
 
-            // Auto-delete jobs from before today
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toLocaleDateString('en-CA');
-            await supabase.from('jobs').delete().lt('job_date', yesterdayStr);
+            // Auto-delete jobs older than 30 days (preserve monthly report history)
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            const thirtyDaysAgoStr = thirtyDaysAgo.toLocaleDateString('en-CA');
+            await supabase.from('jobs').delete().lt('job_date', thirtyDaysAgoStr);
 
             let query = supabase
                 .from('jobs')
