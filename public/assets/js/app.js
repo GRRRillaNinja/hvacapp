@@ -209,8 +209,8 @@ function clockBtnHtml(job) {
     if (isActive) {
         return `<button class="btn btn-clock-out btn-sm" onclick="clockOut(event, '${job.id}')">Clock Out</button>`;
     }
-    const dis = activeEntry ? 'disabled' : '';
-    return `<button class="btn btn-clock-in btn-sm" ${dis} onclick="clockIn(event, '${job.id}')">Clock In</button>`;
+    // Enable clock-in for all jobs; clicking another job auto-clocks out the previous one
+    return `<button class="btn btn-clock-in btn-sm" onclick="clockIn(event, '${job.id}')">Clock In</button>`;
 }
 
 function refreshClockButtons() {
