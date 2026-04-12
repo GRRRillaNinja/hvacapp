@@ -335,6 +335,7 @@ function jobCard(job, index) {
             <div class="job-card-header-content">
                 <div class="job-card-name">${esc(job.customer_name)}</div>
                 <span class="job-card-badge">${TYPE_LABELS[job.job_type] ?? job.job_type}</span>
+                ${(job.days_until_deletion !== undefined && job.days_until_deletion <= 2) ? `<span class="deletion-warning-badge" title="This job will be deleted in ${job.days_until_deletion} day(s)">⚠️ Deleting soon</span>` : ''}
             </div>
             <div class="job-card-header-right">
                 <span class="clock-btn-slot" id="clock-btn-${job.id}" onclick="event.stopPropagation()">${clockBtnHtml(job)}</span>

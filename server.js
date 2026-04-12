@@ -80,11 +80,34 @@ app.get('/api/jobs.php', async (req, res) => {
         } else {
             const date = req.query.date || todayStr();
 
-            // Auto-delete jobs older than 30 days (preserve monthly report history)
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-            const thirtyDaysAgoStr = thirtyDaysAgo.toLocaleDateString('en-CA');
-            await supabase.from('jobs').delete().lt('job_date', thirtyDaysAgoStr);
+            // Job retention: 45 days. Cleanup only on Friday (day 5), delete jobs older than 45 days
+            const today = new Date();
+            const isFriday = today.getDay() === 5;
+            if (isFriday) {
+                const fortyFiveDaysAgo = new Date();
+                fortyFiveDaysAgo.setDate(fortyFiveDaysAgo.getDate() - 45);
+                const fortyFiveDaysAgoStr = fortyFiveDaysAgo.toLocaleDateString('en-CA');
+                await supabase.from('jobs').delete().lt('job_date', fortyFiveDaysAgoStr);
+            }
+
+            // Send deletion warning to jobs 43+ days old (2 days before Friday deletion)
+            const fortyThreeDaysAgo = new Date();
+            fortyThreeDaysAgo.setDate(fortyThreeDaysAgo.getDate() - 43);
+            const fortyThreeDaysAgoStr = fortyThreeDaysAgo.toLocaleDateString('en-CA');
+            const { data: oldJobs } = await supabase
+                .from('jobs')
+                .select('id')
+                .lt('job_date', fortyThreeDaysAgoStr)
+                .is('deletion_warning_sent_at', null);
+
+            if (oldJobs && oldJobs.length > 0) {
+                const now = new Date().toISOString();
+                await supabase
+                    .from('jobs')
+                    .update({ deletion_warning_sent_at: now })
+                    .lt('job_date', fortyThreeDaysAgoStr)
+                    .is('deletion_warning_sent_at', null);
+            }
 
             let query = supabase
                 .from('jobs')
@@ -99,6 +122,13 @@ app.get('/api/jobs.php', async (req, res) => {
                 row.job_data = typeof row.job_data === 'string'
                     ? (JSON.parse(row.job_data) || {})
                     : (row.job_data || {});
+                // Add days_until_deletion to client
+                if (row.job_date) {
+                    const jobDate = new Date(row.job_date);
+                    const today = new Date();
+                    const daysOld = Math.floor((today - jobDate) / (1000 * 60 * 60 * 24));
+                    row.days_until_deletion = Math.max(0, 45 - daysOld);
+                }
                 return row;
             });
             res.json(jobs);
