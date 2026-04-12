@@ -48,7 +48,15 @@
       "Bash(grep -v \"^Retrieving\\\\|^curl\\\\|^$\")",
       "Bash(git add:*)",
       "Bash(git commit -m ':*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(repomix --version)",
+      "Bash(git:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(npm start:*)",
+      "Bash(node -c /c/xampp/htdocs/hvacapp/public/assets/js/app.js)",
+      "Bash(node -c /c/xampp/htdocs/hvacapp/public/assets/js/form.js)",
+      "Bash(node -c /c/xampp/htdocs/hvacapp/server.js)"
     ]
   }
 }

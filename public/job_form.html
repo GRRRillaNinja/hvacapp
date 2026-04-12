@@ -889,5 +889,14 @@ Replaced Dual Capacitor
 <div class="toast" id="toast"></div>
 
 <script src="assets/js/form.js?v=2"></script>
+
+<!-- Service Worker registration for offline support -->
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker registered'))
+        .catch(err => console.log('Service Worker registration failed:', err));
+}
+</script>
 </body>
 </html>
