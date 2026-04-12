@@ -20,6 +20,10 @@
       "dest": "server.js"
     },
     {
+      "src": "/sw\\.js",
+      "dest": "/public/sw.js"
+    },
+    {
       "src": "/reports",
       "dest": "/public/reports.html"
     },
