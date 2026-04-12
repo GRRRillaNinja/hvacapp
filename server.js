@@ -114,6 +114,29 @@ app.post('/api/jobs.php', async (req, res) => {
     try {
         const input = req.body || {};
         const sessionId = getSessionId(req);
+        const idempotencyKey = input.idempotency_key || null;
+
+        // Check for existing job with same idempotency key (retry protection)
+        if (idempotencyKey) {
+            const { data: existingJobs, error: lookupError } = await supabase
+                .from('jobs')
+                .select('id, job_data')
+                .eq('session_id', sessionId)
+                .limit(100);
+
+            if (!lookupError && existingJobs) {
+                const existing = existingJobs.find(job => {
+                    // Check if job_data contains the same idempotency key
+                    // Note: job_data is returned as object by Supabase
+                    return job.job_data && job.job_data.idempotency_key === idempotencyKey;
+                });
+                if (existing) {
+                    console.log(`[IDEMPOTENT] Returning existing job for key ${idempotencyKey}: ${existing.id}`);
+                    return res.json({ id: existing.id, success: true, duplicate: true });
+                }
+            }
+        }
+
         const row = {
             job_date: input.job_date || todayStr(),
             job_type: input.job_type || '',

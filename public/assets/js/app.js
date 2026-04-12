@@ -35,6 +35,184 @@ function getSessionId() {
 }
 function sessionHeaders() { return { 'X-Session-ID': getSessionId() }; }
 
+// ── Offline Job Queue ──────────────────────────────
+const QUEUE_KEY = 'hvac_job_queue';
+
+function getJobQueue() {
+    try {
+        const json = localStorage.getItem(QUEUE_KEY);
+        return json ? JSON.parse(json) : [];
+    } catch (e) {
+        console.error('[QUEUE] Error reading queue:', e);
+        return [];
+    }
+}
+
+function saveQueue(queue) {
+    try {
+        localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+    } catch (e) {
+        console.error('[QUEUE] Error saving queue (quota exceeded?):', e);
+        // Quota exceeded: remove oldest unverified item to make space
+        if (e.name === 'QuotaExceededError') {
+            const currentQueue = getJobQueue();
+            const unverified = currentQueue.filter(q => !q.verified);
+            if (unverified.length > 0) {
+                const oldestUnverified = unverified[0];
+                const newQueue = currentQueue.filter(q => q.tempId !== oldestUnverified.tempId);
+                saveQueue(newQueue); // Retry with one fewer item
+            }
+        }
+    }
+}
+
+function addJobToQueue(jobData, tempId) {
+    const queue = getJobQueue();
+    const item = {
+        tempId,
+        serverId: null,
+        jobData: { ...jobData, idempotency_key: tempId },
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        lastAttemptAt: null,
+        lastError: null,
+        attemptCount: 0,
+        verified: false,
+    };
+    queue.push(item);
+    saveQueue(queue);
+    console.log('[QUEUE] Added job to queue:', tempId);
+}
+
+function markJobSynced(tempId, serverId) {
+    const queue = getJobQueue();
+    const item = queue.find(q => q.tempId === tempId);
+    if (item) {
+        item.status = 'synced';
+        item.serverId = serverId;
+        item.lastAttemptAt = new Date().toISOString();
+        saveQueue(queue);
+        console.log('[QUEUE] Marked as synced:', tempId, '→', serverId);
+    }
+}
+
+function markJobVerified(tempId) {
+    const queue = getJobQueue();
+    const item = queue.find(q => q.tempId === tempId);
+    if (item) {
+        item.verified = true;
+        saveQueue(queue);
+        console.log('[QUEUE] Marked as verified:', tempId);
+    }
+}
+
+function removeVerifiedJob(tempId) {
+    let queue = getJobQueue();
+    queue = queue.filter(q => q.tempId !== tempId);
+    saveQueue(queue);
+    console.log('[QUEUE] Removed verified job:', tempId);
+}
+
+function getPendingJobs() {
+    return getJobQueue().filter(q => q.status === 'pending' || q.status === 'error');
+}
+
+function getAllQueuedJobs() {
+    return getJobQueue().filter(q => !q.verified);
+}
+
+function updateQueueItemJobData(tempId, jobData) {
+    const queue = getJobQueue();
+    const item = queue.find(q => q.tempId === tempId);
+    if (item) {
+        item.jobData = { ...jobData, idempotency_key: tempId };
+        item.lastAttemptAt = null; // Reset attempt counter on edit
+        item.status = 'pending';
+        saveQueue(queue);
+        console.log('[QUEUE] Updated job data:', tempId);
+    }
+}
+
+// ── Sync Pending Jobs ──────────────────────────────
+async function syncPendingJobs() {
+    const pending = getPendingJobs();
+    if (pending.length === 0) {
+        showToast('No jobs to sync', false);
+        return;
+    }
+
+    const syncBtn = document.getElementById('sync-btn');
+    syncBtn.classList.add('syncing');
+    syncBtn.disabled = true;
+
+    let synced = 0;
+    let failed = 0;
+
+    for (const item of pending) {
+        try {
+            console.log('[SYNC] Syncing job:', item.tempId);
+            const res = await fetch('api/jobs.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...sessionHeaders() },
+                body: JSON.stringify(item.jobData),
+            });
+
+            const json = await res.json();
+
+            if (json.error) {
+                throw new Error(json.error);
+            }
+
+            // Success: mark as synced with server ID
+            const serverId = json.id;
+            markJobSynced(item.tempId, serverId);
+            synced++; // Count as synced once POST succeeds
+            console.log('[SYNC] Synced:', item.tempId, '→', serverId);
+
+            // Verify job exists on server (cleanup only; don't block on failure)
+            try {
+                const verifyRes = await fetch(`api/jobs.php?id=${serverId}`, {
+                    headers: sessionHeaders(),
+                });
+                const verifyData = await verifyRes.json();
+                if (verifyData && verifyData.id === serverId) {
+                    markJobVerified(item.tempId);
+                    removeVerifiedJob(item.tempId);
+                    console.log('[SYNC] Verified and removed:', item.tempId);
+                }
+            } catch (e) {
+                console.warn('[SYNC] Verification failed for', item.tempId, 'but keeping in queue:', e);
+                // Keep in queue if verification failed; next sync will retry
+            }
+        } catch (e) {
+            console.error('[SYNC] Error syncing', item.tempId, e);
+            const queue = getJobQueue();
+            const qItem = queue.find(q => q.tempId === item.tempId);
+            if (qItem) {
+                qItem.status = 'error';
+                qItem.lastError = e.message;
+                qItem.attemptCount = (qItem.attemptCount || 0) + 1;
+                qItem.lastAttemptAt = new Date().toISOString();
+                saveQueue(queue);
+            }
+            failed++;
+        }
+    }
+
+    syncBtn.classList.remove('syncing');
+    syncBtn.disabled = false;
+
+    // Reload jobs and update UI
+    await loadJobs();
+
+    let msg = '';
+    if (synced > 0) msg += `Synced ${synced} job(s). `;
+    if (failed > 0) msg += `${failed} still pending.`;
+    if (synced === pending.length) msg = 'All jobs synced!';
+
+    showToast(msg, failed > 0);
+}
+
 // ── Init ──────────────────────────────────────────
 const jobList    = document.getElementById('job-list');
 const headerDate = document.getElementById('header-date');
@@ -86,9 +264,23 @@ function renderJobs(jobs) {
                 </svg>
                 <p>No jobs for today.<br>Tap <strong>+</strong> to add one.</p>
             </div>`;
-        return;
+    } else {
+        jobList.innerHTML = jobs.map((job, index) => jobCard(job, index)).join('');
     }
-    jobList.innerHTML = jobs.map((job, index) => jobCard(job, index)).join('');
+    updateSyncButton();
+}
+
+function updateSyncButton() {
+    const pending = getPendingJobs();
+    const syncBtn = document.getElementById('sync-btn');
+    const syncBadge = document.getElementById('sync-badge');
+
+    if (pending.length > 0) {
+        syncBtn.style.display = 'flex';
+        syncBadge.textContent = pending.length;
+    } else {
+        syncBtn.style.display = 'none';
+    }
 }
 
 function jobCard(job, index) {

@@ -1359,7 +1359,7 @@ function collectData() {
 }
 
 // ─────────────────────────────────────────────────
-// Save job
+// Save job (with offline queue fallback)
 // ─────────────────────────────────────────────────
 async function saveJob() {
     const data = collectData();
@@ -1373,6 +1373,11 @@ async function saveJob() {
     try {
         const isEdit = !!data.id;
         const method = isEdit ? 'PUT' : 'POST';
+
+        // Generate tempId for new jobs (used as idempotency key)
+        const tempId = !isEdit ? crypto.randomUUID() : null;
+        if (tempId) data.idempotency_key = tempId;
+
         console.log(`[HVAC] Saving job (${method}):`, data);
         const res    = await fetch('api/jobs.php', {
             method,
@@ -1382,15 +1387,39 @@ async function saveJob() {
         console.log(`[HVAC] Save response status: ${res.status}`);
         const json = await res.json();
         console.log(`[HVAC] Save response:`, json);
-        if (json.error) throw new Error(json.error);
 
+        if (json.error) {
+            throw new Error(json.error);
+        }
+
+        // Success: offline, redirect to job list
         const date = data.job_date || new Date().toLocaleDateString('en-CA');
         window.location.href = `/?date=${date}`;
+
     } catch (e) {
         console.error(`[HVAC] Error saving job:`, e);
-        showToast('Save failed: ' + e.message, true);
-        btn.disabled = false;
-        btn.textContent = 'Save Job';
+
+        // Distinguish network errors from validation errors
+        const isNetworkError = e instanceof TypeError || e.message.includes('Failed to fetch') || e.name === 'AbortError';
+
+        if (isNetworkError && !data.id) {
+            // Network error on NEW job: queue it for later sync
+            const tempId = data.idempotency_key || crypto.randomUUID();
+            addJobToQueue(data, tempId);
+            showToast('Job saved offline. Will sync when online.', false);
+            console.log('[OFFLINE] Job queued:', tempId);
+
+            // Still navigate back, but show that job is pending sync
+            const date = data.job_date || new Date().toLocaleDateString('en-CA');
+            setTimeout(() => {
+                window.location.href = `/?date=${date}`;
+            }, 1500);
+        } else {
+            // Validation error or edit failed: show error, don't queue
+            showToast('Save failed: ' + e.message, true);
+            btn.disabled = false;
+            btn.textContent = 'Save Job';
+        }
     }
 }
 
