@@ -410,6 +410,20 @@ function refreshClockButtons() {
     allJobs.forEach(job => {
         const slot = document.getElementById('clock-btn-' + job.id);
         if (slot) slot.innerHTML = clockBtnHtml(job);
+
+        // Update active-job class on the job card itself
+        const card = document.getElementById('card-' + job.id);
+        if (card) {
+            const isShop = job.id === 'shop';
+            const isActive = activeEntry && (
+                isShop ? activeEntry.job_id === null : activeEntry.job_id == job.id
+            );
+            if (isActive) {
+                card.classList.add('active-job');
+            } else {
+                card.classList.remove('active-job');
+            }
+        }
     });
 }
 
