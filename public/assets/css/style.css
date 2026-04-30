@@ -817,11 +817,11 @@ main {
     cursor: pointer;
     transition: all var(--duration-base) var(--ease-out);
     font-family: var(--font-body);
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     height: 36px;
-    flex-shrink: 0;
+    flex: 1;
     white-space: nowrap;
 }
 
