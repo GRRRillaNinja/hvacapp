@@ -790,7 +790,8 @@ main {
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
-    gap: var(--space-2);
+    justify-content: space-around;
+    gap: 0;
     box-shadow: var(--shadow-md);
 }
 
@@ -800,7 +801,7 @@ main {
     font-weight: 700;
     font-family: var(--font-serif);
     color: var(--text-primary);
-    flex: 1;
+    flex: 0;
     min-width: 0;
     padding: 0;
     overflow: hidden;
