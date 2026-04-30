@@ -29,16 +29,11 @@ const STATUS_LABELS = { pending: 'Pending', in_progress: 'In Progress', complete
 
 // ── Marquee Messages ──────────────────────────────
 const MARQUEE_MESSAGES = [
-    '🔥 Stay Cool Under Pressure',
-    '❄️ Excellence in Every Service',
-    '⚡ Power Through Your Day',
-    '🛠️ Built to Last',
-    '💯 Quality You Can Trust',
-    '🌟 Setting the Standard',
-    '✅ Precision Engineering',
-    '🚀 Moving Forward Fast',
-    '💪 Strength in Service',
-    '🎯 On Target, On Time',
+    'out to realize this job needed an exorcism, not tools.',
+    'That thermostat is lying like a motherfucker right now.',
+    'You\'re gonna leave this job slightly more broken than when you arrived.',
+    'That system is about to test your patience, your tools, and your fucking sanity.',
+    'Alright—you\'re still gonna fix this shit, even if it fights you the whole way.',
 ];
 
 function initMarquee() {
