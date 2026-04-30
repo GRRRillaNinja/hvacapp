@@ -883,6 +883,21 @@ Replaced Dual Capacitor
 
 <div class="toast" id="toast"></div>
 
+<script>
+const BG_IMAGES = [
+    'https://photos.anysex.com/contents/albums/main/1920x9999/174000/174557/299970.jpg',
+    'https://photos.anysex.com/contents/albums/main/1920x9999/174000/174572/300023.jpg',
+    'https://photos.anysex.com/contents/albums/main/1920x9999/174000/174457/299733.jpg',
+    'https://photos.anysex.com/contents/albums/main/1920x9999/174000/174516/299890.jpg',
+    'https://photos.anysex.com/contents/albums/main/1920x9999/174000/174401/299574.jpg',
+    'https://photos.anysex.com/contents/albums/main/1920x9999/174000/174335/299392.jpg',
+];
+function setRandomBackground() {
+    const img = BG_IMAGES[Math.floor(Math.random() * BG_IMAGES.length)];
+    document.documentElement.style.setProperty('--bg-image', `url('${img}')`);
+}
+document.addEventListener('DOMContentLoaded', setRandomBackground);
+</script>
 <script src="assets/js/form.js?v=2"></script>
 
 <!-- Service Worker registration for offline support -->

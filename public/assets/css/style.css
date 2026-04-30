@@ -92,6 +92,23 @@ html, body {
 body {
     font-family: var(--font-body);
     background: var(--bg-primary);
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: var(--bg-image, none);
+    background-size: cover;
+    background-position: center;
+    opacity: 0.08;
+    z-index: -1;
+    pointer-events: none;
+}
     color: var(--text-primary);
     font-size: 17px;
     font-weight: 500;
