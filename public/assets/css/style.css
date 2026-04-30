@@ -91,8 +91,12 @@ html, body {
 
 body {
     font-family: var(--font-body);
-    background: var(--bg-primary);
-    position: relative;
+    background-color: var(--bg-primary);
+    background-image: var(--bg-image, none);
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 body::before {
@@ -102,11 +106,8 @@ body::before {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: var(--bg-image, none);
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0.2;
+    background-color: var(--bg-primary);
+    opacity: 0.95;
     z-index: -1;
     pointer-events: none;
 }
