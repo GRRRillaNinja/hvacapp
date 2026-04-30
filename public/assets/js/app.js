@@ -139,7 +139,12 @@ window.addEventListener('load', () => {
     marqueeQueue.push(getNextMessage());
     startMarqueeAnimation();
 
-    // DEBUG: Log header visibility on scroll
+    // DEBUG: Show header visibility on-screen
+    const debugDiv = document.createElement('div');
+    debugDiv.id = 'debug-header';
+    debugDiv.style.cssText = 'position: fixed; bottom: 80px; right: 10px; background: rgba(0,0,0,0.9); color: #0f0; font-family: monospace; font-size: 11px; padding: 8px; border-radius: 4px; z-index: 999; max-width: 200px; line-height: 1.3;';
+    document.body.appendChild(debugDiv);
+
     window.addEventListener('scroll', () => {
         const header = document.querySelector('header');
         const headerRect = header.getBoundingClientRect();
@@ -153,15 +158,7 @@ window.addEventListener('load', () => {
         const coveringElement = elementsAtTop[0];
         const coveringZIndex = window.getComputedStyle(coveringElement).zIndex;
 
-        console.log({
-            scroll: window.scrollY,
-            headerTop: Math.round(headerRect.top),
-            headerZIndex: headerZIndex,
-            headerPosition: headerPosition,
-            isVisible: isVisible,
-            coveringElement: coveringElement.tagName + '.' + coveringElement.className,
-            coveringZIndex: coveringZIndex
-        });
+        debugDiv.innerHTML = `scroll: ${Math.round(window.scrollY)}px<br>header top: ${Math.round(headerRect.top)}px<br>header z-idx: ${headerZIndex}<br>header pos: ${headerPosition}<br>visible: ${isVisible}<br>covering: ${coveringElement.tagName}.${coveringElement.className}<br>cover z-idx: ${coveringZIndex}`;
     });
 });
 
