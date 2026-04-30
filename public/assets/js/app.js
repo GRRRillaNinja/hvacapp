@@ -68,23 +68,31 @@ function startMarqueeAnimation() {
     const marqueeEl = document.getElementById('marquee-text');
     if (!marqueeEl) return;
 
-    // Reset position to start just outside right edge
-    gsap.set(marqueeEl, { x: window.innerWidth, opacity: 1 });
-
-    // Calculate duration based on text width
     const textWidth = marqueeEl.offsetWidth;
     const containerWidth = window.innerWidth;
     const totalDistance = containerWidth + textWidth;
-    const pixelsPerSecond = 40; // pixels per second speed
+    const pixelsPerSecond = 40;
     const duration = totalDistance / pixelsPerSecond;
+    const startTime = performance.now();
 
-    // Animate scroll from right to left
-    gsap.to(marqueeEl, {
-        x: '-' + textWidth + 'px',
-        duration: duration,
-        ease: 'none',
-        onComplete: loadNextMarquee
-    });
+    function animate(currentTime) {
+        const elapsed = (currentTime - startTime) / 1000; // convert to seconds
+        const progress = elapsed / duration;
+
+        if (progress >= 1) {
+            marqueeEl.style.transform = `translateX(-${textWidth}px)`;
+            loadNextMarquee();
+            return;
+        }
+
+        const currentX = window.innerWidth - (progress * totalDistance);
+        marqueeEl.style.transform = `translateX(${currentX}px)`;
+        requestAnimationFrame(animate);
+    }
+
+    marqueeEl.style.transform = `translateX(${window.innerWidth}px)`;
+    marqueeEl.style.opacity = '1';
+    requestAnimationFrame(animate);
 }
 
 function loadNextMarquee() {
