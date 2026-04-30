@@ -812,6 +812,12 @@ main {
     padding: var(--space-4) var(--space-6);
 }
 
+.marquee-text::before {
+    content: "\00a0";
+    display: inline-block;
+    width: 0;
+}
+
 .marquee-text {
     font-size: 2.1rem;
     font-weight: 700;
