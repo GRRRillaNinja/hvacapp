@@ -138,6 +138,31 @@ window.addEventListener('load', () => {
     // Pre-queue first few messages for smooth start
     marqueeQueue.push(getNextMessage());
     startMarqueeAnimation();
+
+    // DEBUG: Log header visibility on scroll
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('header');
+        const headerRect = header.getBoundingClientRect();
+        const headerStyles = window.getComputedStyle(header);
+        const headerZIndex = headerStyles.zIndex;
+        const headerPosition = headerStyles.position;
+        const isVisible = headerRect.top < window.innerHeight && headerRect.bottom > 0;
+
+        // Find elements at header position
+        const elementsAtTop = document.elementsFromPoint(window.innerWidth / 2, 10);
+        const coveringElement = elementsAtTop[0];
+        const coveringZIndex = window.getComputedStyle(coveringElement).zIndex;
+
+        console.log({
+            scroll: window.scrollY,
+            headerTop: Math.round(headerRect.top),
+            headerZIndex: headerZIndex,
+            headerPosition: headerPosition,
+            isVisible: isVisible,
+            coveringElement: coveringElement.tagName + '.' + coveringElement.className,
+            coveringZIndex: coveringZIndex
+        });
+    });
 });
 
 // ── Session ID ────────────────────────────────────
