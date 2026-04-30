@@ -781,12 +781,17 @@ main {
 
 /* ─── Form Styles ────────────────────────────────────── */
 .form-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
     background: var(--bg-secondary);
     border-bottom: 2px solid var(--border-default);
     padding: var(--space-4) var(--space-6);
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: var(--space-4);
+    box-shadow: var(--shadow-md);
 }
 
 .form-header h1 {
@@ -814,7 +819,6 @@ main {
 
 .form-body {
     padding: var(--space-8);
-    padding-bottom: 220px;
     max-width: 800px;
 }
 

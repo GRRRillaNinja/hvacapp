@@ -396,6 +396,7 @@ function buildElectricIndoorSection(unitNum, sysType, iPrefix, si) {
         <label><input type="checkbox" name="${iPrefix}_insulated_suction"> Insulated Suction Line</label>
         <label><input type="checkbox" name="${iPrefix}_reglued_cabinet"> Reglued Cabinet Insulation</label>
         <label><input type="checkbox" name="${iPrefix}_cleaned_media_filter"> Cleaned Media Filter</label>
+        <label><input type="checkbox" name="${iPrefix}_verified_uv_light"> Verified UV Light Working</label>
     </div>
     <div class="field-group">
         <label class="field-label">Other Notes</label>
@@ -718,6 +719,7 @@ function buildGasIndoorSection(unitNum, sysType, gPrefix, si) {
         <label><input type="checkbox" name="${gPrefix}_insulated_suction"> Insulated Suction Line</label>
         <label><input type="checkbox" name="${gPrefix}_reglued_cabinet"> Reglued Cabinet Insulation</label>
         <label><input type="checkbox" name="${gPrefix}_cleaned_media_filter"> Cleaned Media Filter</label>
+        <label><input type="checkbox" name="${gPrefix}_verified_uv_light"> Verified UV Light Working</label>
     </div>
     <div class="field-group">
         <label class="field-label">Other Notes</label>
