@@ -237,7 +237,7 @@ main {
 #job-list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-4);
     padding: var(--space-4);
     min-height: calc(100vh - 60px);
     max-width: 800px;
@@ -1014,7 +1014,7 @@ textarea {
 }
 
 .view-section {
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-16);
     background: var(--bg-secondary);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
@@ -1960,7 +1960,7 @@ body.has-bottom-nav .toast {
     background: var(--bg-secondary);
     border: 1px solid var(--border-default);
     border-radius: 12px;
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-8);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
 }
