@@ -71,10 +71,17 @@ function startMarqueeAnimation() {
     // Reset position
     gsap.set(marqueeEl, { x: '100vw', opacity: 1 });
 
+    // Calculate duration based on text width
+    const textWidth = marqueeEl.offsetWidth;
+    const containerWidth = window.innerWidth;
+    const totalDistance = containerWidth + textWidth;
+    const pixelsPerSecond = 120; // pixels per second speed
+    const duration = totalDistance / pixelsPerSecond;
+
     // Animate scroll from right to left
     gsap.to(marqueeEl, {
-        x: '-100vw',
-        duration: 18,
+        x: '-' + textWidth + 'px',
+        duration: duration,
         ease: 'none',
         onComplete: loadNextMarquee
     });
