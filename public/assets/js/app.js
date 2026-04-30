@@ -82,23 +82,34 @@ function startMarqueeAnimation() {
 
     marqueeAnimating = true;
 
-    const msg = marqueeQueue.shift() || getNextMessage();
-    marqueeEl.textContent = msg;
+    // Clear and hide BEFORE setting new text — creates empty gap
+    marqueeEl.textContent = '';
     marqueeEl.style.opacity = '0';
+    marqueeEl.style.transform = 'translateX(100vw)';
 
-    // Force layout to get accurate offsetWidth
-    const textWidth = marqueeEl.offsetWidth;
-    const containerWidth = window.innerWidth;
-    const totalDistance = containerWidth + textWidth;
-    const pixelsPerSecond = 40;
-    const duration = totalDistance / pixelsPerSecond;
-
-    // Start fully off-screen to the right
-    marqueeEl.style.transform = `translateX(${containerWidth}px)`;
-
-    // Brief delay before making visible and starting animation
+    // Wait for empty gap (no text visible), then setup and animate
     setTimeout(() => {
+        const msg = marqueeQueue.shift() || getNextMessage();
+
+        // Set text while still hidden (opacity 0)
+        marqueeEl.textContent = msg;
+
+        // Force layout/reflow before measuring
+        const textWidth = marqueeEl.offsetWidth;
+        const containerWidth = window.innerWidth;
+        const totalDistance = containerWidth + textWidth;
+        const pixelsPerSecond = 40;
+        const duration = totalDistance / pixelsPerSecond;
+
+        // Position off-screen right (still invisible)
+        marqueeEl.style.transform = `translateX(${containerWidth}px)`;
+
+        // Force reflow so transform is committed before opacity flips
+        void marqueeEl.offsetWidth;
+
+        // Now make visible at off-screen position
         marqueeEl.style.opacity = '1';
+
         const startTime = performance.now();
 
         function animate(currentTime) {
@@ -107,9 +118,8 @@ function startMarqueeAnimation() {
 
             if (progress >= 1) {
                 marqueeEl.style.transform = `translateX(${-textWidth}px)`;
-                marqueeEl.style.opacity = '0';
                 marqueeAnimating = false;
-                // Pause 500ms before next message
+                // Pause before next message (creates gap with empty marquee)
                 setTimeout(() => startMarqueeAnimation(), 500);
                 return;
             }
@@ -120,7 +130,7 @@ function startMarqueeAnimation() {
         }
 
         requestAnimationFrame(animate);
-    }, 300);
+    }, 600);
 }
 
 // Initialize marquee on page load
