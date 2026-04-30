@@ -84,12 +84,18 @@ function startMarqueeAnimation() {
 
     const msg = marqueeQueue.shift() || getNextMessage();
     marqueeEl.textContent = msg;
+    marqueeEl.style.opacity = '1';
 
+    // Force layout to get accurate offsetWidth
     const textWidth = marqueeEl.offsetWidth;
     const containerWidth = window.innerWidth;
     const totalDistance = containerWidth + textWidth;
     const pixelsPerSecond = 40;
     const duration = totalDistance / pixelsPerSecond;
+
+    // Start fully off-screen to the right
+    marqueeEl.style.transform = `translateX(${containerWidth}px)`;
+
     const startTime = performance.now();
 
     function animate(currentTime) {
@@ -97,20 +103,18 @@ function startMarqueeAnimation() {
         const progress = elapsed / duration;
 
         if (progress >= 1) {
-            marqueeEl.style.transform = `translateX(-${textWidth}px)`;
+            marqueeEl.style.transform = `translateX(${-textWidth}px)`;
             marqueeAnimating = false;
             // Chain next message immediately
-            startMarqueeAnimation();
+            requestAnimationFrame(() => startMarqueeAnimation());
             return;
         }
 
-        const currentX = window.innerWidth - (progress * totalDistance);
+        const currentX = containerWidth - (progress * totalDistance);
         marqueeEl.style.transform = `translateX(${currentX}px)`;
         requestAnimationFrame(animate);
     }
 
-    marqueeEl.style.transform = `translateX(${window.innerWidth}px)`;
-    marqueeEl.style.opacity = '1';
     requestAnimationFrame(animate);
 }
 
