@@ -1014,7 +1014,8 @@ textarea {
 }
 
 .view-section {
-    margin-bottom: var(--space-16);
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-8);
     background: var(--bg-secondary);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
@@ -1960,6 +1961,7 @@ body.has-bottom-nav .toast {
     background: var(--bg-secondary);
     border: 1px solid var(--border-default);
     border-radius: 12px;
+    margin-top: var(--space-4);
     margin-bottom: var(--space-8);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
