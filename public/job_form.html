@@ -12,13 +12,13 @@
 <body class="form-page">
 
 <header class="form-header">
-<div style="display:flex;align-items:center;gap:1rem;flex:1">
+<div class="form-header-left">
 <button class="back-btn" onclick="history.back()" title="Back">&#8592;</button>
 <h1 id="form-title">New Job</h1>
 </div>
-<div style="display:flex;gap:0.5rem;align-items:center">
+<div class="form-header-right">
+<button type="button" class="btn btn-header-secondary" onclick="history.back()">Cancel</button>
 <button type="button" class="btn btn-danger btn-sm" id="btn-delete" style="display:none" onclick="deleteJob()">Delete</button>
-<button type="button" class="btn" style="background:var(--bg-tertiary);color:var(--text-secondary);padding:0.5rem 1rem;font-size:0.95rem" onclick="history.back()">Cancel</button>
 <button type="button" class="btn btn-primary" id="btn-save" onclick="saveJob()">Save</button>
 </div>
 </header>
