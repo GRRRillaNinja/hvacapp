@@ -36,35 +36,22 @@ const MARQUEE_MESSAGES = [
     'Alright—you\'re still gonna fix this shit, even if it fights you the whole way.',
 ];
 
-let marqueeAnimationId = null;
 let lastMarqueeMessage = null;
 
-function animateMarquee(marqueeEl, duration) {
-    const startTime = performance.now();
-    let animationDone = false;
+function startMarqueeAnimation() {
+    const marqueeEl = document.getElementById('marquee-text');
+    if (!marqueeEl) return;
 
-    function animate(currentTime) {
-        if (animationDone) return;
+    // Reset position
+    gsap.set(marqueeEl, { x: '100vw', opacity: 1 });
 
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-
-        // Scroll from 120% (right, with buffer) to -100% (left)
-        const translateX = 120 - (progress * 220);
-
-        marqueeEl.style.transform = `translateX(${translateX}%)`;
-        marqueeEl.style.opacity = '1';
-
-        if (progress >= 1) {
-            animationDone = true;
-            // Animation complete, load next message
-            loadNextMarquee();
-        } else {
-            marqueeAnimationId = requestAnimationFrame(animate);
-        }
-    }
-
-    marqueeAnimationId = requestAnimationFrame(animate);
+    // Animate scroll from right to left
+    gsap.to(marqueeEl, {
+        x: '-100vw',
+        duration: 18,
+        ease: 'none',
+        onComplete: loadNextMarquee
+    });
 }
 
 function loadNextMarquee() {
@@ -80,13 +67,8 @@ function loadNextMarquee() {
 
     marqueeEl.textContent = msg;
 
-    // Reset to starting position
-    marqueeEl.style.transform = 'translateX(120%)';
-    marqueeEl.style.opacity = '0';
-
-    // Calculate duration based on text width
-    const duration = 18000; // 18 seconds for smooth scroll
-    animateMarquee(marqueeEl, duration);
+    // Start animation for this message
+    startMarqueeAnimation();
 }
 
 // Initialize marquee on page load
