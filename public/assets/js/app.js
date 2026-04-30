@@ -98,7 +98,7 @@ function startMarqueeAnimation() {
         const textWidth = marqueeEl.offsetWidth;
         const containerWidth = window.innerWidth;
         const totalDistance = containerWidth + textWidth;
-        const pixelsPerSecond = 40;
+        const pixelsPerSecond = 50;
         const duration = totalDistance / pixelsPerSecond;
 
         // Position off-screen right (still invisible)
