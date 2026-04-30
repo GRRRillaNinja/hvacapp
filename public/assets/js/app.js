@@ -49,14 +49,11 @@ function animateMarquee(marqueeEl, duration) {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
 
-        // Fade in during first 5% of scroll
-        const opacity = progress < 0.05 ? progress / 0.05 : progress > 0.95 ? (1 - progress) / 0.05 : 1;
-
         // Scroll from 120% (right, with buffer) to -100% (left)
         const translateX = 120 - (progress * 220);
 
         marqueeEl.style.transform = `translateX(${translateX}%)`;
-        marqueeEl.style.opacity = opacity;
+        marqueeEl.style.opacity = '1';
 
         if (progress >= 1) {
             animationDone = true;
@@ -88,7 +85,7 @@ function loadNextMarquee() {
     marqueeEl.style.opacity = '0';
 
     // Calculate duration based on text width
-    const duration = 12000; // 12 seconds base
+    const duration = 18000; // 18 seconds for smooth scroll
     animateMarquee(marqueeEl, duration);
 }
 
