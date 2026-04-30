@@ -84,7 +84,7 @@ function startMarqueeAnimation() {
 
     const msg = marqueeQueue.shift() || getNextMessage();
     marqueeEl.textContent = msg;
-    marqueeEl.style.opacity = '1';
+    marqueeEl.style.opacity = '0';
 
     // Force layout to get accurate offsetWidth
     const textWidth = marqueeEl.offsetWidth;
@@ -96,26 +96,31 @@ function startMarqueeAnimation() {
     // Start fully off-screen to the right
     marqueeEl.style.transform = `translateX(${containerWidth}px)`;
 
-    const startTime = performance.now();
+    // Brief delay before making visible and starting animation
+    setTimeout(() => {
+        marqueeEl.style.opacity = '1';
+        const startTime = performance.now();
 
-    function animate(currentTime) {
-        const elapsed = (currentTime - startTime) / 1000;
-        const progress = elapsed / duration;
+        function animate(currentTime) {
+            const elapsed = (currentTime - startTime) / 1000;
+            const progress = elapsed / duration;
 
-        if (progress >= 1) {
-            marqueeEl.style.transform = `translateX(${-textWidth}px)`;
-            marqueeAnimating = false;
-            // Chain next message immediately
-            requestAnimationFrame(() => startMarqueeAnimation());
-            return;
+            if (progress >= 1) {
+                marqueeEl.style.transform = `translateX(${-textWidth}px)`;
+                marqueeEl.style.opacity = '0';
+                marqueeAnimating = false;
+                // Pause 500ms before next message
+                setTimeout(() => startMarqueeAnimation(), 500);
+                return;
+            }
+
+            const currentX = containerWidth - (progress * totalDistance);
+            marqueeEl.style.transform = `translateX(${currentX}px)`;
+            requestAnimationFrame(animate);
         }
 
-        const currentX = containerWidth - (progress * totalDistance);
-        marqueeEl.style.transform = `translateX(${currentX}px)`;
         requestAnimationFrame(animate);
-    }
-
-    requestAnimationFrame(animate);
+    }, 300);
 }
 
 // Initialize marquee on page load
