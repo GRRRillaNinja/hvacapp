@@ -46,10 +46,14 @@ function initMarquee() {
     setTimeout(() => { marqueeEl.style.animation = ''; }, 10);
 }
 
-// Initialize marquee on page load
+// Initialize marquee on page load and when animation completes
 window.addEventListener('load', initMarquee);
-// Refresh marquee every 10 seconds
-setInterval(initMarquee, 10000);
+document.addEventListener('DOMContentLoaded', () => {
+    const marqueeEl = document.getElementById('marquee-text');
+    if (marqueeEl) {
+        marqueeEl.addEventListener('animationend', initMarquee);
+    }
+});
 
 // ── Session ID ────────────────────────────────────
 function getSessionId() {
