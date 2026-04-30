@@ -813,7 +813,7 @@ main {
 }
 
 .marquee-text {
-    font-size: 1.4rem;
+    font-size: 1.8rem;
     font-weight: 700;
     font-family: var(--font-serif);
     color: var(--accent-gold);

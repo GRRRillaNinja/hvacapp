@@ -75,7 +75,7 @@ function startMarqueeAnimation() {
     const textWidth = marqueeEl.offsetWidth;
     const containerWidth = window.innerWidth;
     const totalDistance = containerWidth + textWidth;
-    const pixelsPerSecond = 120; // pixels per second speed
+    const pixelsPerSecond = 60; // pixels per second speed
     const duration = totalDistance / pixelsPerSecond;
 
     // Animate scroll from right to left
