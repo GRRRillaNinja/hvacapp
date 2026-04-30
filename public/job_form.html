@@ -12,16 +12,11 @@
 <body class="form-page">
 
 <header class="form-header">
-<div class="form-header-left">
-<button class="back-btn" onclick="history.back()" title="Back">&#8592;</button>
+<button class="btn-nav-back" onclick="history.back()" title="Back">&#8592;</button>
 <h1 id="form-title">New Job</h1>
-</div>
-<div class="form-header-divider"></div>
-<div class="form-header-actions">
-<button type="button" class="btn-action-secondary" onclick="history.back()">Cancel</button>
-<button type="button" class="btn-action-danger" id="btn-delete" style="display:none" onclick="deleteJob()">Delete</button>
-<button type="button" class="btn-action-primary" id="btn-save" onclick="saveJob()">Save</button>
-</div>
+<button type="button" class="btn-nav-action btn-nav-secondary" onclick="history.back()">Cancel</button>
+<button type="button" class="btn-nav-action btn-nav-danger" id="btn-delete" style="display:none" onclick="deleteJob()">Delete</button>
+<button type="button" class="btn-nav-action btn-nav-primary" id="btn-save" onclick="saveJob()">Save</button>
 </header>
 
 <form id="job-form" novalidate autocomplete="off">
