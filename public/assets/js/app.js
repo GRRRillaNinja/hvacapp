@@ -41,28 +41,29 @@ let lastMarqueeMessage = null;
 
 function animateMarquee(marqueeEl, duration) {
     const startTime = performance.now();
-    const containerWidth = marqueeEl.parentElement.offsetWidth;
-    const textWidth = marqueeEl.offsetWidth;
-    const totalDistance = containerWidth + textWidth;
+    let animationDone = false;
 
     function animate(currentTime) {
+        if (animationDone) return;
+
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
 
         // Fade in during first 5% of scroll
         const opacity = progress < 0.05 ? progress / 0.05 : progress > 0.95 ? (1 - progress) / 0.05 : 1;
 
-        // Scroll from 100% (right) to -100% (left)
-        const translateX = 100 - (progress * totalDistance / containerWidth * 100);
+        // Scroll from 120% (right, with buffer) to -100% (left)
+        const translateX = 120 - (progress * 220);
 
         marqueeEl.style.transform = `translateX(${translateX}%)`;
         marqueeEl.style.opacity = opacity;
 
-        if (progress < 1) {
-            marqueeAnimationId = requestAnimationFrame(animate);
-        } else {
+        if (progress >= 1) {
+            animationDone = true;
             // Animation complete, load next message
             loadNextMarquee();
+        } else {
+            marqueeAnimationId = requestAnimationFrame(animate);
         }
     }
 
@@ -83,7 +84,7 @@ function loadNextMarquee() {
     marqueeEl.textContent = msg;
 
     // Reset to starting position
-    marqueeEl.style.transform = 'translateX(100%)';
+    marqueeEl.style.transform = 'translateX(120%)';
     marqueeEl.style.opacity = '0';
 
     // Wait for DOM to update text width, then animate
