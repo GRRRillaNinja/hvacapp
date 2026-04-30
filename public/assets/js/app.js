@@ -27,6 +27,35 @@ const SYS_LABELS = {
 const STATUS_OPTS = ['pending', 'in_progress', 'complete'];
 const STATUS_LABELS = { pending: 'Pending', in_progress: 'In Progress', complete: 'Complete' };
 
+// ── Marquee Messages ──────────────────────────────
+const MARQUEE_MESSAGES = [
+    '🔥 Stay Cool Under Pressure',
+    '❄️ Excellence in Every Service',
+    '⚡ Power Through Your Day',
+    '🛠️ Built to Last',
+    '💯 Quality You Can Trust',
+    '🌟 Setting the Standard',
+    '✅ Precision Engineering',
+    '🚀 Moving Forward Fast',
+    '💪 Strength in Service',
+    '🎯 On Target, On Time',
+];
+
+function initMarquee() {
+    const marqueeEl = document.getElementById('marquee-text');
+    if (!marqueeEl) return;
+    const msg = MARQUEE_MESSAGES[Math.floor(Math.random() * MARQUEE_MESSAGES.length)];
+    marqueeEl.textContent = msg;
+    // Restart animation
+    marqueeEl.style.animation = 'none';
+    setTimeout(() => { marqueeEl.style.animation = ''; }, 10);
+}
+
+// Initialize marquee on page load
+window.addEventListener('load', initMarquee);
+// Refresh marquee every 10 seconds
+setInterval(initMarquee, 10000);
+
 // ── Session ID ────────────────────────────────────
 function getSessionId() {
     let id = localStorage.getItem('hvac_session_id');
