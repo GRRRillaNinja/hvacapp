@@ -12,8 +12,9 @@
 <body>
 
 <header class="form-header">
-    <a href="/" class="back-btn" title="Back">&#8592;</a>
-    <h1>Job Detail</h1>
+    <button class="btn-nav-back" onclick="history.back()" title="Back">&#8592;</button>
+    <h1 id="form-title">Job Detail</h1>
+    <button type="button" class="btn-nav-action btn-nav-primary" id="btn-edit" onclick="editJob()">Edit</button>
 </header>
 
 <div id="view-content">
@@ -83,6 +84,10 @@ function formatDate(dateStr) {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+function editJob() {
+    window.location.href = `job_form.php?id=${jobId}`;
+}
+
 // Get job ID from URL
 const params = new URLSearchParams(window.location.search);
 const jobId = params.get('id');
@@ -133,12 +138,9 @@ function renderJob(job) {
 
     // Hero block
     html += `<div class="view-hero">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem">
-            <div>
-                <div class="view-hero-name">${esc(job.customer_name)}</div>
-                ${addr ? `<div class="view-hero-addr">${esc(addr)}</div>` : ''}
-            </div>
-            <a href="job_form.php?id=${job.id}" class="btn btn-ghost btn-sm">&#9998; Edit</a>
+        <div>
+            <div class="view-hero-name">${esc(job.customer_name)}</div>
+            ${addr ? `<div class="view-hero-addr">${esc(addr)}</div>` : ''}
         </div>
         <div class="view-hero-actions">
             ${telUrl ? `<a href="${telUrl}" class="btn btn-call">&#128222; Call</a>` : ''}
