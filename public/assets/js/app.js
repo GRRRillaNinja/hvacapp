@@ -64,9 +64,26 @@ const MARQUEE_MESSAGES = [
 
 let lastMarqueeMessage = null;
 
+let marqueeQueue = [];
+let marqueeAnimating = false;
+
+function getNextMessage() {
+    let msg;
+    do {
+        msg = MARQUEE_MESSAGES[Math.floor(Math.random() * MARQUEE_MESSAGES.length)];
+    } while (msg === lastMarqueeMessage && MARQUEE_MESSAGES.length > 1);
+    lastMarqueeMessage = msg;
+    return msg;
+}
+
 function startMarqueeAnimation() {
     const marqueeEl = document.getElementById('marquee-text');
-    if (!marqueeEl) return;
+    if (!marqueeEl || marqueeAnimating) return;
+
+    marqueeAnimating = true;
+
+    const msg = marqueeQueue.shift() || getNextMessage();
+    marqueeEl.textContent = msg;
 
     const textWidth = marqueeEl.offsetWidth;
     const containerWidth = window.innerWidth;
@@ -76,12 +93,14 @@ function startMarqueeAnimation() {
     const startTime = performance.now();
 
     function animate(currentTime) {
-        const elapsed = (currentTime - startTime) / 1000; // convert to seconds
+        const elapsed = (currentTime - startTime) / 1000;
         const progress = elapsed / duration;
 
         if (progress >= 1) {
             marqueeEl.style.transform = `translateX(-${textWidth}px)`;
-            loadNextMarquee();
+            marqueeAnimating = false;
+            // Chain next message immediately
+            startMarqueeAnimation();
             return;
         }
 
@@ -95,25 +114,12 @@ function startMarqueeAnimation() {
     requestAnimationFrame(animate);
 }
 
-function loadNextMarquee() {
-    const marqueeEl = document.getElementById('marquee-text');
-    if (!marqueeEl) return;
-
-    // Pick message, avoid repeating last one
-    let msg;
-    do {
-        msg = MARQUEE_MESSAGES[Math.floor(Math.random() * MARQUEE_MESSAGES.length)];
-    } while (msg === lastMarqueeMessage && MARQUEE_MESSAGES.length > 1);
-    lastMarqueeMessage = msg;
-
-    marqueeEl.textContent = msg;
-
-    // Start animation for this message
-    startMarqueeAnimation();
-}
-
 // Initialize marquee on page load
-window.addEventListener('load', loadNextMarquee);
+window.addEventListener('load', () => {
+    // Pre-queue first few messages for smooth start
+    marqueeQueue.push(getNextMessage());
+    startMarqueeAnimation();
+});
 
 // ── Session ID ────────────────────────────────────
 function getSessionId() {
