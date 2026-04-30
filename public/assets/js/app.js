@@ -68,14 +68,14 @@ function startMarqueeAnimation() {
     const marqueeEl = document.getElementById('marquee-text');
     if (!marqueeEl) return;
 
-    // Reset position
-    gsap.set(marqueeEl, { x: '100vw', opacity: 1 });
+    // Reset position to start just outside right edge
+    gsap.set(marqueeEl, { x: window.innerWidth, opacity: 1 });
 
     // Calculate duration based on text width
     const textWidth = marqueeEl.offsetWidth;
     const containerWidth = window.innerWidth;
     const totalDistance = containerWidth + textWidth;
-    const pixelsPerSecond = 60; // pixels per second speed
+    const pixelsPerSecond = 40; // pixels per second speed
     const duration = totalDistance / pixelsPerSecond;
 
     // Animate scroll from right to left

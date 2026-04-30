@@ -813,7 +813,7 @@ main {
 }
 
 .marquee-text {
-    font-size: 1.8rem;
+    font-size: 2.1rem;
     font-weight: 700;
     font-family: var(--font-serif);
     color: var(--accent-gold);
@@ -821,8 +821,6 @@ main {
     text-transform: uppercase;
     letter-spacing: 0.05em;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    transform: translateX(100%);
-    opacity: 0;
 }
 
 /* ─── Form Styles ────────────────────────────────────── */
