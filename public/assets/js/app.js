@@ -37,6 +37,7 @@ const MARQUEE_MESSAGES = [
 ];
 
 let marqueeAnimationId = null;
+let lastMarqueeMessage = null;
 
 function animateMarquee(marqueeEl, duration) {
     const startTime = performance.now();
@@ -72,7 +73,13 @@ function loadNextMarquee() {
     const marqueeEl = document.getElementById('marquee-text');
     if (!marqueeEl) return;
 
-    const msg = MARQUEE_MESSAGES[Math.floor(Math.random() * MARQUEE_MESSAGES.length)];
+    // Pick message, avoid repeating last one
+    let msg;
+    do {
+        msg = MARQUEE_MESSAGES[Math.floor(Math.random() * MARQUEE_MESSAGES.length)];
+    } while (msg === lastMarqueeMessage && MARQUEE_MESSAGES.length > 1);
+    lastMarqueeMessage = msg;
+
     marqueeEl.textContent = msg;
 
     // Reset to starting position
@@ -81,11 +88,12 @@ function loadNextMarquee() {
 
     // Wait for DOM to update text width, then animate
     requestAnimationFrame(() => {
-        const duration = 6000; // Base 6 seconds
+        const duration = 12000; // 12 seconds base
         const textWidth = marqueeEl.offsetWidth;
         const containerWidth = marqueeEl.parentElement.offsetWidth;
         const totalDistance = containerWidth + textWidth;
-        const adjustedDuration = (totalDistance / (containerWidth + 300)) * duration;
+        // Scale duration by distance (longer text = longer scroll)
+        const adjustedDuration = (totalDistance / 500) * duration;
 
         animateMarquee(marqueeEl, adjustedDuration);
     });
