@@ -87,17 +87,9 @@ function loadNextMarquee() {
     marqueeEl.style.transform = 'translateX(120%)';
     marqueeEl.style.opacity = '0';
 
-    // Wait for DOM to update text width, then animate
-    requestAnimationFrame(() => {
-        const duration = 12000; // 12 seconds base
-        const textWidth = marqueeEl.offsetWidth;
-        const containerWidth = marqueeEl.parentElement.offsetWidth;
-        const totalDistance = containerWidth + textWidth;
-        // Scale duration by distance (longer text = longer scroll)
-        const adjustedDuration = (totalDistance / 500) * duration;
-
-        animateMarquee(marqueeEl, adjustedDuration);
-    });
+    // Calculate duration based on text width
+    const duration = 12000; // 12 seconds base
+    animateMarquee(marqueeEl, duration);
 }
 
 // Initialize marquee on page load
